@@ -1,0 +1,75 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>404 - Page Not Found</title>
+    <!-- Tailwind CSS CDN for styling -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Google Fonts - Inter -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
+    <style>
+        /* Custom styles */
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: #f3f4f6; /* Light gray background */
+            color: #374151; /* Dark gray text */
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh; /* Full viewport height */
+            margin: 0;
+            padding: 1rem; /* Add some padding on smaller screens */
+            box-sizing: border-box;
+        }
+        .error-container {
+            text-align: center;
+            background-color: #ffffff; /* White background for the content box */
+            padding: 2.5rem;
+            border-radius: 0.75rem; /* Rounded corners */
+            box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05); /* Soft shadow */
+            max-width: 500px;
+            width: 100%;
+        }
+        h1 {
+            font-size: 4rem; /* Large 404 text */
+            font-weight: 700;
+            color: #ef4444; /* Red color for emphasis */
+            margin-bottom: 1rem;
+            line-height: 1;
+        }
+        h2 {
+            font-size: 1.875rem; /* Medium heading */
+            font-weight: 600;
+            color: #1f2937; /* Darker gray */
+            margin-bottom: 1rem;
+        }
+        p {
+            font-size: 1.125rem; /* Slightly larger paragraph text */
+            margin-bottom: 2rem;
+            line-height: 1.5;
+        }
+        .home-button {
+            display: inline-block;
+            background-color: #2563eb; /* Blue background for button */
+            color: #ffffff; /* White text for button */
+            padding: 0.75rem 1.5rem;
+            border-radius: 0.5rem; /* Rounded button corners */
+            text-decoration: none; /* No underline */
+            font-weight: 600;
+            transition: background-color 0.3s ease; /* Smooth transition on hover */
+        }
+        .home-button:hover {
+            background-color: #1d4ed8; /* Darker blue on hover */
+        }
+    </style>
+</head>
+<body>
+    <div class="error-container">
+        <h1>404</h1>
+        <h2>Page Not Found!</h2>
+        <p>Sorry, the page you are looking for might have been moved, removed, or never existed.</p>
+        <a href="privacy-policy.html" class="home-button">Return to Home Page</a>
+    </div>
+</body>
+</html>
