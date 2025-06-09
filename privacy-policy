@@ -1,0 +1,118 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Privacy Policy - 10k Clicks</title>
+    <!-- Tailwind CSS CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: #f3f4f6; /* Light gray background */
+            color: #374151; /* Dark gray text */
+            line-height: 1.6;
+        }
+        .container {
+            max-width: 800px;
+            margin: 2rem auto;
+            padding: 2rem;
+            background-color: #ffffff; /* White background for content */
+            border-radius: 0.75rem; /* Rounded corners */
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1); /* Subtle shadow */
+        }
+        h1, h2 {
+            color: #1f2937; /* Even darker gray for headings */
+            font-weight: 700;
+            margin-bottom: 1rem;
+        }
+        h1 {
+            font-size: 2.25rem; /* Large heading */
+            text-align: center;
+        }
+        h2 {
+            font-size: 1.5rem; /* Medium heading */
+            border-bottom: 2px solid #e5e7eb; /* Light border under headings */
+            padding-bottom: 0.5rem;
+            margin-top: 2rem;
+        }
+        p {
+            margin-bottom: 1rem;
+        }
+        ul {
+            list-style-type: disc;
+            margin-left: 1.5rem;
+            margin-bottom: 1rem;
+        }
+        li {
+            margin-bottom: 0.5rem;
+        }
+        .date {
+            text-align: center;
+            font-size: 0.9rem;
+            color: #6b7280; /* Lighter gray for date */
+            margin-bottom: 2rem;
+        }
+        .highlight {
+            font-weight: 600;
+            color: #ef4444; /* Red color for emphasis */
+        }
+        .placeholder-email {
+            font-weight: 600;
+            color: #2563eb; /* Blue color for email placeholder */
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Privacy Policy</h1>
+        <p class="date">Last updated: June 9, 2025</p>
+
+        <p>This Privacy Policy outlines the principles regarding the collection, use, and disclosure of personal data by <span class="font-bold">Jurek36</span> concerning the game <span class="font-bold">10k Clicks</span>.</p>
+
+        <p>We assure you that your privacy is our highest priority. Therefore, we are pleased to inform you that our game has been designed in such a way as to <span class="highlight">not collect any of your personal data</span>.</p>
+
+        ---
+
+        <h2>1. Types of Data Collected</h2>
+        <p>In the context of the operation of the game <span class="font-bold">10k Clicks</span>, <span class="font-bold">Jurek36</span> <span class="highlight">does not collect any personal data</span> or information enabling user identification.</p>
+        <p>This means that we do not collect, process, or store the following information:</p>
+        <ul>
+            <li>Your identification data (e.g., name, surname, email address, IP address).</li>
+            <li>Demographic data (e.g., age, gender, location).</li>
+            <li>Game usage data (e.g., in-game progress, statistics, preferences, time spent in game).</li>
+            <li>Device data (e.g., device type, operating system, unique device identifiers).</li>
+            <li>Online activity information, including tracking and analytical data.</li>
+        </ul>
+        <p>We do not use any analytical tools, tracking systems, cookies, or similar technologies to monitor user interaction with the game.</p>
+
+        ---
+
+        <h2>2. Purpose of Data Collection</h2>
+        <p>As we do not collect any personal data, there are no purposes for its processing or use. The game functions completely autonomously on the user's device, without the need for any data exchange with external servers.</p>
+
+        ---
+
+        <h2>3. Sharing Data with Third Parties</h2>
+        <p>Due to the lack of personal data collection, <span class="font-bold">Jurek36</span> <span class="highlight">does not share any data with third parties</span>, including business partners, analytical service providers, or advertisers.</p>
+
+        ---
+
+        <h2>4. Access to Device Functions</h2>
+        <p>The game <span class="font-bold">10k Clicks</span> may require basic access to your device's functions, such as the ability to save game state locally. This access is strictly limited to functionalities necessary for the proper operation of the game and <span class="highlight">is not used to collect or transmit any data outside your device</span>.</p>
+
+        ---
+
+        <h2>5. Changes to the Privacy Policy</h2>
+        <p>This Privacy Policy may be subject to future changes. Any modifications will be published on this page. In the event that we decide to collect any personal data in the future, users will be <span class="highlight">clearly informed</span>, and the required consents will be obtained before such changes are implemented.</p>
+        <p>We encourage you to regularly review this Privacy Policy to familiarize yourself with its current version.</p>
+
+        ---
+
+        <h2>6. Contact</h2>
+        <p>If you have any questions or concerns regarding this Privacy Policy, please contact us:</p>
+        <p>Email address: <a href="mailto:kontakt@jurek36.pl" class="placeholder-email">kontakt@jurek36.pl</a></p>
+    </div>
+</body>
+</html>
