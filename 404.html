@@ -3,73 +3,359 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>404 - Page Not Found</title>
-    <!-- Tailwind CSS CDN for styling -->
-    <script src="https://cdn.tailwindcss.com"></script>
-    <!-- Google Fonts - Inter -->
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
+    <title>404 - Page Not Found | Jurek36</title>
     <style>
-        /* Custom styles */
-        body {
-            font-family: 'Inter', sans-serif;
-            background-color: #f3f4f6; /* Light gray background */
-            color: #374151; /* Dark gray text */
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            min-height: 100vh; /* Full viewport height */
+        * {
             margin: 0;
-            padding: 1rem; /* Add some padding on smaller screens */
+            padding: 0;
             box-sizing: border-box;
         }
-        .error-container {
-            text-align: center;
-            background-color: #ffffff; /* White background for the content box */
-            padding: 2.5rem;
-            border-radius: 0.75rem; /* Rounded corners */
-            box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05); /* Soft shadow */
-            max-width: 500px;
-            width: 100%;
+
+        body {
+            font-family: 'Arial', sans-serif;
+            background: linear-gradient(135deg, #0f0f0f 0%, #1a1a1a 50%, #0d1f0d 100%);
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            overflow: hidden;
         }
-        h1 {
-            font-size: 4rem; /* Large 404 text */
-            font-weight: 700;
-            color: #ef4444; /* Red color for emphasis */
-            margin-bottom: 1rem;
+
+        .container {
+            background: rgba(20, 20, 20, 0.9);
+            backdrop-filter: blur(20px);
+            border-radius: 25px;
+            padding: 60px 40px;
+            text-align: center;
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.5);
+            border: 1px solid rgba(76, 175, 80, 0.3);
+            max-width: 600px;
+            width: 90%;
+            animation: fadeInUp 1s ease-out;
+            position: relative;
+            z-index: 10;
+        }
+
+        @keyframes fadeInUp {
+            from {
+                opacity: 0;
+                transform: translateY(30px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .error-number {
+            font-size: 8em;
+            font-weight: 900;
+            color: #4caf50;
+            text-shadow: 0 0 30px rgba(76, 175, 80, 0.5);
+            margin-bottom: 20px;
+            animation: glitch 2s infinite;
             line-height: 1;
         }
-        h2 {
-            font-size: 1.875rem; /* Medium heading */
+
+        @keyframes glitch {
+            0%, 100% { 
+                transform: translate(0);
+                filter: hue-rotate(0deg);
+            }
+            10% { 
+                transform: translate(-2px, 2px);
+                filter: hue-rotate(90deg);
+            }
+            20% { 
+                transform: translate(-2px, -2px);
+                filter: hue-rotate(180deg);
+            }
+            30% { 
+                transform: translate(2px, 2px);
+                filter: hue-rotate(270deg);
+            }
+            40% { 
+                transform: translate(2px, -2px);
+                filter: hue-rotate(0deg);
+            }
+        }
+
+        .error-title {
+            color: #e0e0e0;
+            font-size: 2.2em;
+            margin-bottom: 15px;
             font-weight: 600;
-            color: #1f2937; /* Darker gray */
-            margin-bottom: 1rem;
+            animation: slideInLeft 0.8s ease-out 0.3s both;
         }
-        p {
-            font-size: 1.125rem; /* Slightly larger paragraph text */
-            margin-bottom: 2rem;
-            line-height: 1.5;
+
+        @keyframes slideInLeft {
+            from {
+                opacity: 0;
+                transform: translateX(-50px);
+            }
+            to {
+                opacity: 1;
+                transform: translateX(0);
+            }
         }
-        .home-button {
+
+        .error-message {
+            color: #b0b0b0;
+            font-size: 1.2em;
+            margin-bottom: 40px;
+            line-height: 1.6;
+            animation: slideInRight 0.8s ease-out 0.5s both;
+        }
+
+        @keyframes slideInRight {
+            from {
+                opacity: 0;
+                transform: translateX(50px);
+            }
+            to {
+                opacity: 1;
+                transform: translateX(0);
+            }
+        }
+
+        .buttons-container {
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+            align-items: center;
+            animation: fadeInUp 0.8s ease-out 0.7s both;
+        }
+
+        .btn {
             display: inline-block;
-            background-color: #2563eb; /* Blue background for button */
-            color: #ffffff; /* White text for button */
-            padding: 0.75rem 1.5rem;
-            border-radius: 0.5rem; /* Rounded button corners */
-            text-decoration: none; /* No underline */
+            padding: 18px 35px;
+            background: linear-gradient(45deg, #2e7d32, #4caf50);
+            color: white;
+            text-decoration: none;
+            border-radius: 50px;
+            font-size: 1.1em;
             font-weight: 600;
-            transition: background-color 0.3s ease; /* Smooth transition on hover */
+            transition: all 0.3s ease;
+            position: relative;
+            overflow: hidden;
+            box-shadow: 0 8px 25px rgba(76, 175, 80, 0.3);
+            width: 250px;
+            text-align: center;
+            border: 1px solid rgba(76, 175, 80, 0.2);
         }
-        .home-button:hover {
-            background-color: #1d4ed8; /* Darker blue on hover */
+
+        .btn::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(76, 175, 80, 0.4), transparent);
+            transition: left 0.5s ease;
+        }
+
+        .btn:hover::before {
+            left: 100%;
+        }
+
+        .btn:hover {
+            transform: translateY(-5px) scale(1.05);
+            box-shadow: 0 15px 35px rgba(76, 175, 80, 0.4);
+        }
+
+        .btn:active {
+            transform: translateY(-2px) scale(1.02);
+        }
+
+        .floating-shapes {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            overflow: hidden;
+            z-index: 1;
+        }
+
+        .shape {
+            position: absolute;
+            background: rgba(76, 175, 80, 0.05);
+            border-radius: 50%;
+            animation: float 10s ease-in-out infinite;
+            border: 1px solid rgba(76, 175, 80, 0.1);
+        }
+
+        .shape:nth-child(1) {
+            width: 120px;
+            height: 120px;
+            top: 10%;
+            left: 10%;
+            animation-delay: 0s;
+        }
+
+        .shape:nth-child(2) {
+            width: 80px;
+            height: 80px;
+            top: 70%;
+            right: 15%;
+            animation-delay: 3s;
+        }
+
+        .shape:nth-child(3) {
+            width: 100px;
+            height: 100px;
+            top: 30%;
+            right: 20%;
+            animation-delay: 6s;
+        }
+
+        .shape:nth-child(4) {
+            width: 60px;
+            height: 60px;
+            bottom: 20%;
+            left: 20%;
+            animation-delay: 9s;
+        }
+
+        @keyframes float {
+            0%, 100% {
+                transform: translateY(0px) rotate(0deg);
+                opacity: 0.3;
+            }
+            50% {
+                transform: translateY(-40px) rotate(180deg);
+                opacity: 0.7;
+            }
+        }
+
+        .glitch-text {
+            position: relative;
+            display: inline-block;
+        }
+
+        .glitch-text::before {
+            content: "404";
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            color: #ff0040;
+            animation: glitch-1 2s infinite;
+            clip-path: polygon(0 0, 100% 0, 100% 45%, 0 45%);
+        }
+
+        .glitch-text::after {
+            content: "404";
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            color: #00ff41;
+            animation: glitch-2 2s infinite;
+            clip-path: polygon(0 55%, 100% 55%, 100% 100%, 0 100%);
+        }
+
+        @keyframes glitch-1 {
+            0%, 100% { transform: translate(0); }
+            10% { transform: translate(-2px, -2px); }
+            20% { transform: translate(2px, 2px); }
+            30% { transform: translate(-2px, 2px); }
+            40% { transform: translate(2px, -2px); }
+        }
+
+        @keyframes glitch-2 {
+            0%, 100% { transform: translate(0); }
+            15% { transform: translate(2px, 2px); }
+            25% { transform: translate(-2px, -2px); }
+            35% { transform: translate(2px, -2px); }
+            45% { transform: translate(-2px, 2px); }
+        }
+
+        @media (max-width: 768px) {
+            .container {
+                padding: 40px 20px;
+            }
+            
+            .error-number {
+                font-size: 6em;
+            }
+            
+            .error-title {
+                font-size: 1.8em;
+            }
+            
+            .error-message {
+                font-size: 1.1em;
+            }
+            
+            .btn {
+                width: 100%;
+                max-width: 280px;
+            }
         }
     </style>
 </head>
 <body>
-    <div class="error-container">
-        <h1>404</h1>
-        <h2>Page Not Found!</h2>
-        <p>Sorry, the page you are looking for might have been moved, removed, or never existed.</p>
-        <a href="privacy-policy.html" class="home-button">Return to Home Page</a>
+    <div class="floating-shapes">
+        <div class="shape"></div>
+        <div class="shape"></div>
+        <div class="shape"></div>
+        <div class="shape"></div>
     </div>
+
+    <div class="container">
+        <div class="error-number glitch-text">404</div>
+        <h1 class="error-title">Page Not Found</h1>
+        <p class="error-message">
+            This page doesn't exist.
+        </p>
+        
+        <div class="buttons-container">
+            <a href="/" class="btn">
+                🏠 Back to Home
+            </a>
+        </div>
+    </div>
+
+    <script>
+        // Efekt paralaksy dla kształtów
+        document.addEventListener('mousemove', (e) => {
+            const shapes = document.querySelectorAll('.shape');
+            const x = e.clientX / window.innerWidth;
+            const y = e.clientY / window.innerHeight;
+            
+            shapes.forEach((shape, index) => {
+                const speed = (index + 1) * 0.2;
+                const xPos = (x - 0.5) * speed * 20;
+                const yPos = (y - 0.5) * speed * 20;
+                
+                shape.style.transform = `translate(${xPos}px, ${yPos}px) rotate(${index * 45}deg)`;
+            });
+        });
+
+        // Easter egg - kliknięcie w 404 powoduje dodatkowy efekt glitch
+        document.querySelector('.error-number').addEventListener('click', function() {
+            this.style.animation = 'none';
+            setTimeout(() => {
+                this.style.animation = 'glitch 0.5s infinite';
+            }, 10);
+            
+            setTimeout(() => {
+                this.style.animation = 'glitch 2s infinite';
+            }, 2000);
+        });
+
+        // Przypadkowe miganie granic kontenera
+        setInterval(() => {
+            const container = document.querySelector('.container');
+            container.style.borderColor = 'rgba(76, 175, 80, 0.6)';
+            setTimeout(() => {
+                container.style.borderColor = 'rgba(76, 175, 80, 0.3)';
+            }, 100);
+        }, 5000 + Math.random() * 3000);
+    </script>
 </body>
 </html>
