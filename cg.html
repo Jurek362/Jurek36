@@ -6,6 +6,7 @@
     <title>Generator Porad Cleangirl (AI) - WhatsApp Style</title>
     <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@300;400;600;700&display=swap" rel="stylesheet">
     <style>
+        /* General body styling */
         body {
             font-family: 'Montserrat', sans-serif;
             background: linear-gradient(to right, #fdfbfb, #ebedee);
@@ -19,6 +20,7 @@
             box-sizing: border-box;
         }
 
+        /* Container for the main application content */
         .container {
             background-color: #ffffff;
             border-radius: 15px;
@@ -29,6 +31,7 @@
             text-align: center;
         }
 
+        /* Heading style */
         h1 {
             color: #7B68EE; /* MediumSlateBlue */
             margin-bottom: 30px;
@@ -36,6 +39,7 @@
             font-weight: 700;
         }
 
+        /* Input group styling for topic input */
         .input-group {
             margin-bottom: 20px;
             display: flex;
@@ -67,6 +71,7 @@
             box-shadow: 0 0 0 3px rgba(218, 112, 214, 0.2);
         }
 
+        /* Button group layout */
         .button-group {
             display: flex;
             justify-content: center;
@@ -75,6 +80,7 @@
             flex-wrap: wrap; /* Allow buttons to wrap on smaller screens */
         }
 
+        /* Common button styles */
         .advice-button, .copy-button {
             background-color: #9370DB; /* MediumPurple */
             color: white;
@@ -97,6 +103,7 @@
             transform: translateY(0);
         }
 
+        /* Specific style for copy button */
         .copy-button {
             background-color: #DA70D6; /* Orchid */
         }
@@ -105,6 +112,7 @@
             background-color: #C71585; /* MediumVioletRed */
         }
 
+        /* Advice display area */
         #adviceDisplay {
             margin-top: 30px;
             background-color: #f9f9f9;
@@ -123,8 +131,23 @@
             white-space: pre-wrap; /* Preserve whitespace and line breaks from AI */
             line-height: 1.6; /* Adjust line height for readability */
             font-size: 1em; /* Default font size for generated text */
+            word-wrap: break-word; /* Ensure long words break */
+        }
+        #adviceDisplay pre {
+            white-space: pre-wrap;
+            word-break: break-all;
+            background-color: #eee;
+            padding: 10px;
+            border-radius: 5px;
+        }
+        #adviceDisplay code {
+            font-family: monospace;
+            background-color: #eee;
+            padding: 2px 4px;
+            border-radius: 3px;
         }
 
+        /* Class to show/hide the advice display with transition */
         #adviceDisplay.show {
             opacity: 1;
             transform: translateY(0);
@@ -140,18 +163,19 @@
             color: #DA70D6; /* Orchid */
         }
         #adviceDisplay blockquote {
-            border-left: 3px solid #DA70D6;
+            border-left: none; /* Remove standard blockquote border */
             margin: 1em 0;
-            padding-left: 1em;
+            padding-left: 0;
             color: #555;
             font-style: italic;
+            position: relative;
         }
-        #adviceDisplay h3 { /* For headers like `SPODENKI DRESOWE` */
-            font-size: 1.2em;
-            color: #7B68EE; /* MediumSlateBlue */
-            margin-top: 1.5em;
-            margin-bottom: 0.5em;
-            text-transform: uppercase;
+        #adviceDisplay blockquote::before {
+            content: '| '; /* Add WhatsApp quote pipe */
+            color: #DA70D6; /* Orchid */
+            font-weight: bold;
+            position: absolute;
+            left: 0;
         }
         #adviceDisplay ul {
             list-style: none; /* Remove default bullets */
@@ -164,7 +188,15 @@
             color: #555;
             padding-left: 1.2em; /* Space for custom bullet */
         }
-        /* Custom bullet point for lists, if AI uses them - relying on AI for direct Unicode */
+        #adviceDisplay ul li::before {
+            content: '* '; /* Use asterisk as bullet, as per WhatsApp style */
+            color: #9370DB; /* MediumPurple */
+            font-weight: bold;
+            position: absolute;
+            left: 0;
+        }
+
+        /* Loading indicator animation */
         #adviceDisplay .loading-indicator {
             font-size: 1.2em;
             color: #9370DB;
@@ -178,6 +210,7 @@
             100% { opacity: 0.5; }
         }
 
+        /* Responsive adjustments for smaller screens */
         @media (max-width: 600px) {
             .container {
                 padding: 25px;
@@ -217,30 +250,36 @@
             <button class="copy-button" onclick="copyAdvice()">Kopiuj poradę</button>
         </div>
         <div id="adviceDisplay">
-            <!-- Tutaj pojawi się porada po wygenerowaniu -->
+            <!-- Initial message/loading indicator -->
             <p class="loading-indicator">Wpisz temat i kliknij "Wygeneruj nową poradę!", aby rozpocząć!</p>
         </div>
     </div>
 
     <script>
-        let lastGeneratedRawContent = ""; // Zmienna globalna do przechowywania surowej, sformatowanej treści od AI
+        let lastGeneratedRawContent = ""; // Global variable to store the raw, formatted content from AI for copying
 
+        // Default categories for advice if no custom topic is provided
         const defaultAdviceCategories = [
             "przyjaźń", "nauka", "samoopieka", "motywacja", "styl i wizerunek",
             "finanse", "zdrowie", "relacje", "produktywność", "rozwój osobisty"
         ];
 
+        /**
+         * Generates a new piece of advice based on a custom topic or a random default category.
+         * It interacts with the Gemini API to get AI-generated content.
+         */
         async function generateAdvice() {
             const customTopicInput = document.getElementById('customTopicInput');
             const customTopic = customTopicInput.value.trim();
 
             const adviceDisplay = document.getElementById('adviceDisplay');
-            adviceDisplay.classList.remove('show');
-            adviceDisplay.innerHTML = '<div class="loading-indicator">Generowanie porady...</div>'; // Wskaźnik ładowania
-            adviceDisplay.classList.add('show');
+            adviceDisplay.classList.remove('show'); // Hide for transition
+            adviceDisplay.innerHTML = '<div class="loading-indicator">Generowanie porady...</div>'; // Show loading indicator
+            adviceDisplay.classList.add('show'); // Show loading indicator with transition
 
             let currentTopicName;
 
+            // Determine the topic for advice generation
             if (customTopic) {
                 currentTopicName = customTopic;
             } else {
@@ -248,224 +287,179 @@
                 currentTopicName = randomCategoryName;
             }
 
-            // Przygotowanie promptu dla AI z przykładami pełnego formatowania i naciskiem na "WhatsApp style"
+            // Prepare the detailed prompt for the AI, emphasizing WhatsApp formatting and "cleangirl" style.
+            // All backticks meant to be literal for AI formatting are escaped with an extra backslash.
             const prompt = `Jesteś "cleangirl" i chcesz stworzyć kompletny poradnik na temat *${currentTopicName}*.
-            Twoim zadaniem jest wygenerowanie 3-6 porad, które będą miały **bardzo dużo formatowania**, emotikonów Unicode (gwiazdki, serca, niestandardowe kulki, ozdobne linie itp.) i będą wyglądać jak gotowy do wklejenia post na WhatsAppie lub Instagramie.
+            Twoim zadaniem jest wygenerowanie 3-6 porad, które będą miały **bardzo dużo formatowania** (tylko w stylu WhatsApp), emotikonów Unicode (gwiazdki, serca, niestandardowe kulki, ozdobne linie itp.) i będą wyglądać jak gotowy do wklejenia post na WhatsAppie lub Instagramie.
             Styl powinien być "cleangirl": pozytywny, inspirujący, praktyczny, z lekkim i przyjaznym tonem.
             Każda porada powinna być długa (2-5 zdań) i szczegółowa.
 
-            **Koniecznie używaj różnorodnych elementów formatowania z poniższych przykładów:**
-            - Wprowadzenie (np. "Pewnie! Oto nowa, świeża porada – temat: *[temat w kursywie]*:")
-            - Nagłówki kategorii (np. \\\`*PORADY NA TEMAT [TEMAT W UPPERCASE]*\\\` [emotikony])
-            - Różne typy linii dekoracyjnych (np. \\\`୨────୨ৎ────ৎ\\\`, \\\`∘⁠˚⁠˳⁠° ──── ౨ৎ ────∘⁠˚⁠˳⁠°\\\`, \\\`────∘⁠˚⁠˳⁠°𐙚∘⁠˚⁠˳⁠°────\\\`, \\\`*୨ৎ ────୨ৎ──── ୨ৎ*\\\`, \\\`*──°₊⊹˚⋆*୨♡ৎ⊹₊°──*\\\`)
-            - Różne style bullet pointów/wprowadzeń do porad (np. \\\`> 🤝 ᝰ [Tytuł]\\\`, \\\`ᡣ𐭩 _[tekst]_\\\`, \\\`~𐙚 _[tekst]_\\\`, \\\`౨ৎ _[tekst]_\\\`, \\\`\\\`[NAGŁÓWEK]\\\`\\\` [emotikona], \\\`• _[tekst]_\\\`)
-            - Używaj **kursywy** (*tekst* lub _tekst_) i **pogrubienia** (**tekst**) w treści porad.
+            **Koniecznie używaj WYŁĄCZNIE poniższego formatowania tekstowego w stylu WhatsApp:**
+            - Kursywa: \`_text_\` (np. _Twoja porada_)
+            - Pogrubienie: \`*text*\` (np. *ważna informacja*)
+            - Przekreślenie: \`~text~\` (np. ~stare podejście~)
+            - Monospace: \`\`\`text\`\`\` (np. \\\`\\\`\\\`kod lub specjalny tekst\\\`\\\`\\\`)
+            - Cytat: \`> text\` (np. > Moja myśl)
+            - Inline code: \`\`text\`\` (np. \\\`mały fragment kodu\\\`)
+            - Lista punktowa:
+                \`* text\`
+                \`* text\`
+                LUB
+                \`- text\`
+                \`- text\`
+            - NIE UŻYWAJ żadnego innego formatowania, np. /tekst/, \\tekst\\.
+            - Na koniec dodaj frazę "Zostaw (emotka związana z tematem) dla motywacji", np. "Zostaw ❤️ dla motywacji". Wybierz emotkę pasującą do tematu porady.
             - Na koniec NIE dodawaj żadnego podpisu ani imienia. Po prostu zakończ porady.
-            - Używaj szerokiej gamy emotikonów Unicode (takich jak: 🧋🫂💬, 🎄🍊✨, 🫶🏻🏝️ৎ, 😝🤙🏻, 🥂🌊, 😻🫶🏻, 🫂🏝️, 🥂🤍, 🌙💫, 🪄🌸🎧, 🎀✨, 💖🎀, 🦋💫, 🌸💌, 🍀🌈, 💎🌿, 🌟💖, 💡📓, 🧘‍♀️💆‍♀️, 💅🛍️, 💰📈, 🍎🏋️‍♀️, 🤝🗣️, 🗓️⏰, 🌱✨, 💍, ✈️, ☀️, 🫂, 🩰, 🏄🏼‍♀️, 🌺, 🏝️, 🤍, 🥥, 🎧, 🍃, 🕊️, 🧠, 📚, 🕒, 📖, 😊, 🏃, 🌷, 💭, 🍵, 🕯️, 🤞🏻, 💐, 🌴, 😻, 🏡).
+            - Używaj szerokiej gamy emotikonów Unicode (takich jak: 🧋🫂💬, 🎄🍊✨, 🫶🏻🏝️ৎ, 😝🤙🏻, 🥂🌊, 😻🫶🏻, 🫂🏝️, 🥂🤍, 🌙💫, 🪄🌸🎧, 🎀✨, 💖🎀, 🦋💫, 🌸💌, 🍀🌈, 💎🌿, 🌟💖, 💡📓, 🧘‍♀️💆‍♀️, 💅🛍️, 💰📈, 🍎🏋️‍♀️, 🤝🗣️, 🗓️⏰, 🌱✨, 💍, ✈️, ☀️, 🫂, 🩰, 🏄🏼‍♀️, 🌺, 🏝️, 🤍, 🥥, 🎧, 🍃, 🕊️, 🧠, 📚, 🕒, 📖, 😊, 🏃, 🌷, 💭, 🍵, 🕯️, 🤞🏻, 💐, 🌴, 😻, 🏡, 🍪, 📦, 📓, 📸, 🎶, 🥛, 🍨, 💋, 🤭, 😵‍💫, 🥹, 🦈, 🫖, 🧇, 🥞, 🥗, 🦩, 🪼, 🧺, 📦, 📓, 📸, 🎶, 🥛, 🍨, 💋, 🤭, 😵‍💫, 🥹, 🦈, 🫖, 🧇, 🥞, 🥗, 👑, 🙌🏻, 🐆, 📵, 🫧, 🐚, 🍯, 🍓, ☕, 🥝, 🎨, 💗, 🕊️, 🙈).
 
             Zwróć **cały gotowy tekst** porady (wraz z wprowadzeniem) jako jedną ciągłą odpowiedź. Nie dodawaj żadnego innego tekstu przed ani po wygenerowanym bloku porad. Wybierz jeden z poniższych stylów formatowania i zastosuj go konsekwentnie w całej generowanej poradzie.
 
             --- PRZYKŁADY OCZEKIWANEGO FORMATU I STYLU ---
 
-            Pewnie! Oto nowa, świeża porada – temat: *przyjaźń*:
+            Pewnie! Oto nowa, świeża porada – temat: _przyjaźń_:
 
-            *\\\`PORADY NA TEMAT PRZYJAŹNI\\\`* 🧋🫂💬
-
-            > 🤝 ᝰ Słuchaj naprawdę
-            _Nie przerywaj, nie oceniaj – po prostu bądź obecna. Czasem to wystarczy, żeby ktoś poczuł się **ważny** i wysłuchany. Prawdziwa przyjaźń opiera się na głębokim zrozumieniu i wsparciu, które budują silną więź. ✨_
-
-            > 🪞 ᝰ Bądź sobą
-            _Nie udawaj kogoś, kim nie jesteś, żeby komuś zaimponować. **Prawdziwa przyjaźń** nie potrzebuje masek ani udawania. Autentyczność to klucz do trwałych relacji, gdzie możesz czuć się swobodnie i bezpiecznie. 💖_
-
-            > 📱 ᝰ Odpisuj, nawet krótko
-            _Nie musisz pisać elaboratu za każdym razem. Nawet szybkie „Hej, widziałam, dzięki!” czy „Później pogadamy!” pokazuje, że Ci zależy i pamiętasz o drugiej osobie. **Małe gesty** budują poczucie bliskości. 🎀_
-
-            > 💔 ᝰ Nie bój się przeprosić
-            _Jeśli coś zepsułaś – przyznaj to. Przyjaciel nie oczekuje perfekcji, tylko szczerości i gotowości do naprawienia błędu. Umiejętność przepraszania pokazuje **dojrzałość** i szacunek dla Waszej relacji. 🌷_
-
-            > 🌈 ᝰ Ciesz się z sukcesów drugiej osoby
-            _To nie wyścig ani rywalizacja. Jeśli ktoś z Twoich ludzi coś osiąga – **świętuj razem z nim**! Szczerze okazywana radość wzmacnia więź i buduje wzajemne zaufanie. To prawdziwa definicja wsparcia. 🚀_
-
-            ---
-
-            Jasne! Oto *porady na wigilię klasową* w tym samym lekkim stylu:
-
-            *\\\`PORADY NA WIGILIĘ KLASOWĄ\\\`* 🎄🍊✨
-
-            > 🎁 ᝰ Przynieś coś od serca
-            _Nie musisz kupować drogiego prezentu – liczy się **pomysł i dobre intencje**. Nawet własnoręczna kartka lub mała, spersonalizowana drobnostka może kogoś wzruszyć i sprawić, że poczuje się wyjątkowo doceniony. 💖_
-
-            > 🫶 ᝰ Bądź miły dla wszystkich
-            _Nawet jeśli z kimś się mniej trzymasz – uśmiech, życzenia czy wspólny śmiech potrafią zdziałać cuda. Świąteczna atmosfera to idealny moment na **budowanie pozytywnych relacji** w klasie, niezależnie od codziennych układów. ✨_
-
-            > 🎅 ᝰ Weź udział w zabawach
-            _Nie „krindżuj” – po prostu **baw się dobrze**! Wigilia to nie konkurs na bycie cool, tylko moment, żeby się połączyć jako klasa i stworzyć wspólną, radosną pamiatkę. Pamiętaj, że liczy się wspólna zabawa. 🥳_
-
-            > 🍽️ ᝰ Szanuj to, co przynieśli inni
-            _Nawet jeśli coś Ci nie smakuje lub nie jest w Twoim stylu – nie komentuj negatywnie. Ktoś się starał i poświęcił czas, aby to przygotować, więc docenij jego wysiłek i intencje. Szacunek to podstawa. 🌸_
-
-            > 💫 ᝰ Złóż życzenia każdemu
-            _Nawet zwykłe 'Wesołych świąt!' może poprawić komuś dzień i sprawić, że poczuje się zauważony. Nie bądź duchem – bądź świątecznym światłem, które rozjaśnia atmosferę i buduje pozytywne wibracje. 🌟_
-
-            ---
-
-            ౨ _porady na wakacje!_ 🫶🏻🏝️ৎ
+            *PORADY NA TEMAT PRZYJAŹNI* 🧋🫂💬
             ୨────୨ৎ────ৎ
-            ᡣ𐭩 _jeśli masz już kartę rowerową to możesz się wybrać na przejażdżkę i **przejechać jak najwięcej**_ 🌺
+            > Słuchaj naprawdę
+            _Nie przerywaj, nie oceniaj – po prostu bądź obecna. Czasem to wystarczy, żeby ktoś poczuł się *ważny* i wysłuchany. Prawdziwa przyjaźń opiera się na głębokim zrozumieniu i wsparciu, które budują silną więź. ✨_
 
-            ᡣ𐭩 _zrób nockę na trampolinie z przyjaciółmi! To niesamowite wspomnienie i mnóstwo śmiechu pod gwiazdami._ ✈️
+            > Bądź sobą
+            _Nie udawaj kogoś, kim nie jesteś, żeby komuś zaimponować. *Prawdziwa przyjaźń* nie potrzebuje masek ani udawania. Autentyczność to klucz do trwałych relacji, gdzie możesz czuć się swobodnie i bezpiecznie. 💖_
 
-            ᡣ𐭩 _zrób właśnie owocowe lody! Są **zdrowe i pyszne**, idealne na upalne dni. Spróbuj z truskawkami i bananami!_ ☀️
+            > Odpisuj, nawet krótko
+            _Nie musisz pisać elaboratu za każdym razem. Nawet szybkie „Hej, widziałam, dzięki!” czy „Później pogadamy!” pokazuje, że Ci zależy i pamiętasz o drugiej osobie. *Małe gesty* budują poczucie bliskości. 🎀_
 
-            ᡣ𐭩 _zrób z przyjaciółką **15 tysięcy kroków**_ 🫂
+            > Nie bój się przeprosić
+            _Jeśli coś zepsułaś – przyznaj to. Przyjaciel nie oczekuje perfekcji, tylko szczerości i gotowości do naprawienia błędu. Umiejętność przepraszania pokazuje *dojrzałość* i szacunek dla Waszej relacji. 🌷_
 
-            ᡣ𐭩 _spędź cały dzień na jeden wybrany kolor! To kreatywne wyzwanie, które odmieni Twój dzień. Ubierz się, jedz i otocz się tym kolorem!_ 🩰
+            > Ciesz się z sukcesów drugiej osoby
+            _To nie wyścig ani rywalizacja. Jeśli ktoś z Twoich ludzi coś osiąga – *świętuj razem z nim*! Szczerze okazywana radość wzmacnia więź i buduje wzajemne zaufanie. To prawdziwa definicja wsparcia. 🚀_
+            Zostaw 🫂 dla motywacji!
+
+            ---
+
+            ᯓ *_\\\`NO MORE BOREDOM\\\`_* 💿🫖
+            _୨ৎ *czyli kilka pomysłów na nudę!* ୨ৎ_
+            ⋆₊˚⊹ ──── •.° ୨ৎ °.• ──── ⋆₊˚⊹
+            * Wypróbuj prosty przepis na coś słodkiego 🍪
+            * Posprzątaj w szufladzie albo miejscu, które odkładasz na później 📦
+            * Zacznij pisać notatki albo dziennik 📓
+            * Zrób kilka ładnych zdjęć rzeczy z twojego pokoju 📸
+            * Stwórz nową playlistę na Spotify 🎶
+            ⋆₊˚⊹ ──── •.° ୨ৎ °.• ──── ⋆₊˚⊹
+            *ᯓᡣ𐭩 zostaw ❤️ dla motywacji*
+
+            ---
+
+            _Good morning!_ 🧇
+
+            > Jak tam, wyspane? 🥂
+            > Ja nawet tak! 🫧
+
+            > Macie jakieś plany na dziś? 🐚
+            > Ja muszę się pouczyć matmy na jutrzejszą kartkówkę 🤍
+
+            > Łapcie śniadanko, jeśli jeszcze nie jadłyście »🥛🍨«!
+            > Miłego dnia, powodzenia w szkole! 💋
+            Zostaw 🤍 dla motywacji!
+
+            ---
+
+            𓇼𝑊𝑒_જ⁀➴ *Good morning* ☀️!
+            > Wyspane🤞🏻?
+            > Ja średnio ostatnio nie umiem się wysypać [hah] 🤭
+
+            > Śniadanko dla was girls 🤘🏻!
+            > \\\`\\\`\\\`🥞🥗🍵🧇\\\`\\\`\\\`
+
+            > Macie jakieś plany 🥂?
+            > Ja mam w planach naukę na jutrzejszy sprawdzian z matmy 😵‍💫🥹!
+
+            > Miłego dnia💗!
+            > Postaram się napisać dziś dużo poradek (nie obiecuję) 🤍😽!
+            Zostaw 💗 dla motywacji!
+
+            ---
+
+            _⋆.˚ᝰNatal𐙚 *PORADY* 🤍🥂🫶🏻
+            ~ _zdrowy tryb życiaa_ 🥬~
+            ∘⁠˚⁠˳⁠° ──── ౨ৎ ────∘⁠˚⁠˳⁠°
+            * _pij dużo wody! to bardzo wazne_ 🌊
+
+            * _poranna joga? zdecydowanie tak!_ 🏄🏼‍♀️
+
+            * _jedz zdrowe rzeczy np. sałatki warzywne/owocowe lub fit deserki!_ 🥂
+
+            * _rób pielęgnację skóry! będziesz mieć piękną i zdrową_ 🌺
+
+            * _zmieniaj co tydzień poszewkę na poduszkę! wtedy wszystkie tego typu bakterie które się zbierają znikną!_ 😻
+            ∘⁠˚⁠˳⁠° ──── ౨ৎ ────∘⁠˚⁠˳⁠°
+            Zostaw 🌱 dla motywacji!
+
+            ---
+
+            ᝰ. _nie wiesz jak się ubrać? pozwól że ci pomogę śliczna!_ 🌺🥂🫶🏻
+            _p 2_ 🫂
+            ────୨ৎ────
+            - _jasno różowe baggy dresy + jasno różowa biała koszulka (na długi rękaw) + białe nike_ 🥥
+
+            - _szare dresy + biały top (na długi rękaw) + szare nike_ 🍵
+
+            - _niebieskie baggy jeansy + biały top z hibiskusem + adidas campusy (szare)_ 🚀
+
+            - _ciemno szara bluzka (na długi rękaw) + ciemno niebiesko - zielone baggy jeansy + różowe nike_ ☀️
+            ────୨ৎ────
+            Zostaw 🛍️ dla motywacji!
+
+            ---
+
+            ᝰ. *JOURNAL IDEAS* 🫶🏻🥥🍵
+            > *czyli pomysły co zapisać w pamiętniku!* 🫂🥂
             ୨────୨ৎ────ৎ
-
-            ---
-
-            *\\\`RANDOMOWE PORADY\\\`* 😝🤙🏻
-            ∘⁠˚⁠˳⁠° ──── ౨ৎ ────∘⁠˚⁠˳⁠°
-            > _mając włączony tryb samolotowy, **szybciej naładujesz telefon**. Ogranicza to zużycie baterii przez aplikacje działające w tle. To prosty, ale skuteczny trik._ 🫂
-
-            > _dopasowanie swojego zapachu perfum do zapachu żelu pod prysznic sprawi, że **będziesz ładniej pachnieć** przez cały dzień. To subtelny detal, który robi różnicę._ 🏄🏼‍♀️
-
-            > _pierz i zmieniaj swoje poszewki na poduszki co tydzień. To klucz do **czystej cery** i higieny snu. Świeża pościel to podstawa dobrego samopoczucia._ 🌺
-
-            > _na ugryzienie owada pomaga przyłożenie **zimnej łyżki**. Chłód zmniejsza opuchliznę i swędzenie. Szybka ulga bez zbędnych środków._ 🏝️
-
-            > _zanim uszyjesz eyelinera, upewnij się, że **potrafisz robić kreski**. Poćwicz na ręce lub papierze, aby uniknąć frustracji i makijażowych wpadek. Praktyka czyni mistrza!_ 🤍
-            ∘⁠˚⁠˳⁠° ──── ౨ৎ ────∘⁠˚⁠˳⁠°
-
-            ---
-
-            𐙚 _ubrania na lato z sieciówek_ 🥂🌊
+            * _about me_ 🫶🏻
+            * _przepisy_ 👑
+            * _hasła do aplikacji_ 🌺
+            * _wishlist_ ✈️
+            * _rutyna skincare_ 🌴
+            * _urodziny przyjaciół_ 💍
+            * _podroze (miejsca w których był*ś)_ 🏄🏼‍♀️
+            * _oszczędzanie_ 🤍
+            * _anielskie liczby_ 🚀
+            * _kalendarz_ 🙌🏻
+            * _książki które przeczytał*ś_ 🐆
             ୨────୨ৎ────ৎ
-            \\\`SPODENKI DRESOWE\\\` 🥥
-            • _pull&bear_
-            • _cropp_
-            • _h&m_
-
-            \\\`SPODENKI JEANSOWE\\\` 🌺
-            • _bershka_
-            • _house_
-            • _h&m_
-
-            \\\`BASIC TOPY\\\` 🏝️
-            • _bershka_
-            • _sinsay_
-            • _h&m_
-            • _reserved_
-
-            \\\`BIŻUTERIA\\\` 🫶🏻
-            • _amazon, temu_
-            • _stradivarius_
-            • _h&m_
-            ୨────୨ৎ────ৎ
+            _jak oceniacie poradkę?_ 😝
+            Zostaw 📓 dla motywacji!
 
             ---
 
-            ╰┈➤ _porady - jak szybko zapuścić włosy?_ 😻🫶🏻
-            ────∘⁠˚⁠˳⁠°𐙚∘⁠˚⁠˳⁠°────
-            ~𐙚 _stosuj wcierki_. To prawdziwy hit, który stymuluje cebulki do szybszego wzrostu. Bądź regularna, a efekty Cię zaskoczą! 💍
+            \\\`selfcare night — wieczór tylko dla siebie!\\\`🛁🕯️💗
 
-            ~𐙚 _na noc związuj je w warkocza bądź w koka_. To chroni włosy przed mechanicznymi uszkodzeniami i łamaniem się podczas snu. Rano obudzisz się z pięknymi i gładkimi włosami. 🏝️
+            𓂃 ₊˚⊹ \\\`zacznij od odłożenia telefonu.\\\` 🌴
+            _to Twój czas offline — świat poczeka 📵✨_
+            ≻───── ⋆✩⋆ ─────≺
+            * *\\\`ciepły prysznic lub kąpiel\\\`* 🪼
+            _użyj pachnącego żelu, zapal świeczkę i pozwól sobie na relaks 🛁🫧🕯️_
+            ≻───── ⋆✩⋆ ─────≺
+            * *\\\`maska na twarz, olejek na włosy\\\`*🌊
+            _zadbaj o siebie jak o najlepszą przyjaciółkę 💆‍♀️🍯_
+            ≻───── ⋆✩⋆ ─────≺
+            * *\\\`ulubiony napój + coś lekkiego\\\`*🍹
+            _herbatka, kakao, może owoce? 🍓☕🥝_
+            ≻───── ⋆✩⋆ ─────≺
+            * *\\\`coś co cię uspokoi\\\`*🥥
+            _książka, journaling, malowanie, muzyka – cokolwiek działa na Twoją duszę 🎶📖🎨_
+            ≻───── ⋆✩⋆ ─────≺
+            * *\\\`spisz 3 rzeczy, za które  dzis dziękujesz\\\`*🧺
+            _wdzięczność koi serce 💗🕊️_
+            ≻───── ⋆✩⋆ ─────≺
+            ˗ˏˋ 💌 _Bo czas dla siebie to nie luksus — to potrzeba._ ˎˊ˗
+            *jesteś ważna. zasługujesz  na chwile spokoju*🙈
 
-            ~𐙚 _przed myciem włosów nakładaj olejek kokosowy na około 20 - 40 minut_. Intensywnie nawilża i odżywia włosy, sprawiając, że są mocniejsze i bardziej lśniące. To prosty rytuał dla zdrowych włosów. 🥥
-
-            ~𐙚 _nie rozjaśniaj włosów_. Proces rozjaśniania osłabia ich strukturę, co może hamować wzrost. Naturalny kolor to często klucz do zdrowych i długich włosów. 🌺
-            ────∘⁠˚⁠˳⁠°𐙚∘⁠˚⁠˳⁠°────
-
-            ---
-
-            ᡣ𐭩 _porady - czysty pokój_ 🫂🏝️
-            *୨ৎ ────୨ৎ──── ୨ৎ*
-            > *ᝰ. co tydzień w wybrany dzień ścieraj kurze i odkurzaj w pokoju*. Regularność to klucz do utrzymania porządku bez większego wysiłku. Czysty pokój to czysty umysł! 🌺
-
-            > *ᝰ. staraj się regularnie robić porządki w szafie i w różnych półkach*. Pozbywanie się niepotrzebnych rzeczy i organizacja przestrzeni sprawi, że pokój będzie wyglądał na większy i bardziej uporządkowany. 🫶🏻
-
-            > *ᝰ. na biurku poukładaj sobie książki i zrób sobie pojemniczek z długopisami*. Uporządkowana przestrzeń do nauki i pracy sprzyja koncentracji i kreatywności. Wszystko na swoim miejscu to mniej stresu. 🥂
-
-            > *ᝰ. podlej wszystkie kwiatki i roślinki w pokoju*. Rośliny nie tylko upiększają przestrzeń, ale też poprawiają jakość powietrza. Ich pielęgnacja to mały akt miłości do Twojego otoczenia. 🌴
-
-            > *ᝰ. jeśli masz gdzieś porozwalane ubrania pozbieraj je i włóż do szafy*. To prosty nawyk, który od razu sprawi, że poczujesz się lepiej, a pokój będzie schludniejszy. Małe kroki prowadzą do wielkich zmian. 😻
-            *୨ৎ ────୨ৎ──── ୨ৎ*
-
-            ---
-
-            \\\`PORADY\\\` 🥂🤍
-            » _przeprowadzka_ 🩰🌴
-            ∘⁠˚⁠˳⁠° ──── ౨ৎ ────∘⁠˚⁠˳⁠°
-            ౨ৎ _wszystkie potrzebne rzeczy najlepiej spakuj sobie w jakieś kartony_. Oznacz je dokładnie, aby później łatwo było znaleźć to, czego potrzebujesz w nowym miejscu. To zaoszczędzi Ci wiele czasu i nerwów po przeprowadzce. 😝
-
-            ౨ৎ _zrób sobie przegląd wszystko co rzeczy które zabierasz_. To idealna okazja, aby pozbyć się tego, co jest już niepotrzebne, zepsute lub nieużywane. Mniej rzeczy to łatwiejsza i szybsza przeprowadzka. 🏄🏼‍♀️
-
-            ౨ৎ _zorganizuj sobie listę na której będziesz mieć zapisane wszystkie rzeczy które potrzebujesz_. To pomoże Ci uniknąć zapomnienia o czymkolwiek ważnym. Lista to Twój najlepszy przyjaciel podczas pakowania. 🌺
-
-            ౨ৎ _na jakiejś karteczce albo w notatkach zapisz sobie plan kiedy musisz coś spakować_. Podziel proces na etapy, aby nie czuć się przytłoczona. Małe kroki doprowadzą Cię do celu bez zbędnego stresu. 🌊
-
-            ౨ৎ _przed samym wyjazdem napewno zobacz czy niczego nie zapomniałaś_. Ostatnie szybkie sprawdzenie wszystkich pomieszczeń i szafek da Ci pewność, że wszystko jest na swoim miejscu i niczego nie zostawiłaś za sobą. ☀️
-            ∘⁠˚⁠˳⁠° ──── ౨ৎ ────∘⁠˚⁠˳⁠°
+            _zareguj „🦩” po poranne selfcare_
+            Zostaw 🛀 dla motywacji!
 
             ---
-
-            ➤💬 *Porady na lepszy sen* 🌙
-            *──°₊⊹˚⋆*୨♡ৎ⊹₊°──*
-            > _unikaj telefonu na godzinę przed snem_. Niebieskie światło ekranów zakłóca produkcję melatoniny. Zamiast tego, poczytaj książkę lub posłuchaj relaksującej muzyki. 💫
-
-            > _zadbaj o spokojną atmosferę w pokoju_. Obniż temperaturę, zgaś jasne światła i upewnij się, że jest cicho. Ciemne, chłodne i ciche środowisko sprzyja głębokiemu snu. 🌷
-
-            > _posłuchaj relaksującej muzyki lub dźwięków natury_. Delikatne melodie, szum fal czy śpiew ptaków mogą pomóc Ci się wyciszyć i odprężyć przed snem. Stwórz swoją ulubioną playlistę do zasypiania. 💭
-
-            > _napij się ciepłej herbatki ziołowej_. Melisa, rumianek czy lawenda działają uspokajająco na układ nerwowy i pomagają odprężyć się po stresującym dniu. Unikaj kofeiny wieczorem. 🍵
-
-            > _spróbuj codziennie chodzić spać o tej samej porze_. Regularny rytm snu pomaga uregulować zegar biologiczny Twojego ciała, co ułatwia zasypianie i budzenie się. Konsekwencja jest kluczem! 🕯️
-
-            > _przewietrz pokój przed snem_. Świeże powietrze jest kluczowe dla komfortowego snu. Niska temperatura i odpowiednia wentylacja pomogą Ci szybciej zasnąć i głębiej spać. 🥂
-            *──°₊⊹˚⋆*୨♡ৎ⊹₊°──*
-            ➤ _Zostaw miłą reakcję dla motywacji!_ 🤞🏻
-            *──°₊⊹˚⋆*୨♡ৎ⊹₊°──*
-
-            ---
-
-            *\\\`PORADY DLA 4 KLAS\\\`*🪄👀
-
-            > 🧠 ᝰ Zadawaj pytania, gdy czegoś nie rozumiesz
-            _Nie bój się pytać nauczyciela lub kolegów z klasy – to najlepszy sposób na naukę i zrozumienie materiału! Pamiętaj, że nie ma głupich pytań, tylko niezadane odpowiedzi. 💡_
-
-            > 📚 ᝰ Zawsze odrabiaj zadania domowe
-            _To pomaga utrwalić to, czego uczysz się na lekcjach. Lepiej robić codziennie po trochu niż wszystko na raz. Systematyczność to klucz do sukcesu w szkole! 📝_
-
-            > 🕒 ᝰ Zorganizuj swój czas
-            _Miej plan dnia: szkoła, odpoczynek, nauka i zabawa. Dzięki temu łatwiej będzie ci się uczyć i znajdziesz czas na przyjemności i rozwijanie swoich pasji. Balans to podstawa! 🗓️_
-
-            > 📖 ᝰ Czytaj książki nie tylko z lektur
-            _Czytanie rozwija wyobraźnię, wzbogaca słownictwo i pomaga lepiej pisać wypracowania. Odkryj świat poza lekturami – znajdź gatunki, które Cię wciągną i sprawią, że czytanie stanie się przyjemnością. 🌟_
-
-            > 😊 ᝰ Bądź miły dla innych
-            _Pomagaj kolegom, szanuj nauczycieli i bądź życzliwy. Dobre relacje w klasie to podstawa przyjemnej atmosfery i wspólnego uczenia się. Pamiętaj, że dobro wraca! 💖_
-
-            > 🏃 ᝰ Ruszaj się i odpoczywaj
-            _Nie samą nauką człowiek żyje! Spacer, gra w piłkę, rysowanie czy inne hobby pomagają zachować równowagę i odstresować się po dniu w szkole. Aktywność fizyczna to energia do działania! 🌿_
-
-            *REAGUJ JAKA KLASA KOLEJNA*
-
-            ---
-
-            ➤💬 *Jak urozmaicić zwykły dzień?* 🪄
-            *──°₊⊹˚⋆*୨♡ৎ⊹₊°──*
-            > _zrób sobie śniadanie, jakbyś była w kawiarni_. Udekoruj talerz, zaparz aromatyczną kawę lub herbatę i ciesz się chwilą. To mały rytuał, który może pozytywnie nastawić Cię na resztę dnia. 🌸
-
-            > _napisz coś miłego komuś, z kim dawno nie gadałaś_. Krótka wiadomość, komplement lub przypomnienie o wspólnym wspomnieniu może sprawić radość zarówno Tobie, jak i odbiorcy. Dziel się pozytywną energią! 💌
-
-            > _posłuchaj nowej muzyki albo podcastu_. Odkrywanie nowych dźwięków i inspirujących historii to świetny sposób na poszerzanie horyzontów i oderwanie się od codzienności. Znajdź coś, co Cię wciągnie! 🎧
-
-            > _idź na spacer w nowe miejsce, choćby 10 min_. Zmień swoją typową trasę, odkryj inną uliczkę, park czy osiedle. Zmiana otoczenia pobudza zmysły i dodaje świeżości nawet najbardziej rutynowemu dniu. 🍃
-
-            > _zmień coś w pokoju – nawet mały detal_. Przestaw meble, dodaj nową dekorację, zmień układ poduszek na łóżku. Odświeżenie przestrzeni wokół siebie może pozytywnie wpłynąć na Twój nastrój i kreatywność. 🕊️
-            *──°₊⊹˚⋆*୨♡ৎ⊹₊°──*
-            ➤ _Zostawcie 🫶🏻 jeżeli spróbujecie czegoś z tej listy!_ 💐
-            *──°₊⊹˚⋆*୨♡ৎ⊹₊°──*
             `;
 
             let chatHistory = [];
@@ -474,12 +468,13 @@
             const payload = {
                 contents: chatHistory,
                 generationConfig: {
-                    // Oczekujemy, że AI zwróci gotowy tekst z formatowaniem Markdown/Unicode
+                    // Expect AI to return raw text with Markdown/Unicode formatting
                     responseMimeType: "text/plain"
                 }
             };
 
-            const apiKey = "AIzaSyChSd5TnsmPwLYZAQclq_al2WC4KVULWNg"; // TWÓJ KLUCZ API GEMINI
+            // Your API key is preserved.
+            const apiKey = "AIzaSyChSd5TnsmPwLYZAQclq_al2WC4KVULWNg";
             const apiUrl = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=${apiKey}`;
 
             try {
@@ -500,64 +495,103 @@
                     result.candidates[0].content && result.candidates[0].content.parts &&
                     result.candidates[0].content.parts.length > 0) {
                     let aiGeneratedContent = result.candidates[0].content.parts[0].text;
-                    lastGeneratedRawContent = aiGeneratedContent; // Przechowaj surową treść do kopiowania
+                    lastGeneratedRawContent = aiGeneratedContent; // Store raw content for copying
 
-                    // Prosta konwersja Markdown na HTML. Zostawiamy dużo dla AI do bezpośredniego generowania.
-                    aiGeneratedContent = aiGeneratedContent.replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>'); // Bold
-                    aiGeneratedContent = aiGeneratedContent.replace(/\*(.*?)\*/g, '<em>$1</em>');       // Italic (using single asterisk)
-                    aiGeneratedContent = aiGeneratedContent.replace(/_([^_]+)_/g, '<em>$1</em>');       // Italic (using underscore)
-                    aiGeneratedContent = aiGeneratedContent.replace(/^> (.*)$/gm, '<blockquote>$1</blockquote>'); // Blockquote
-                    aiGeneratedContent = aiGeneratedContent.replace(/`([^`]+)`/g, '<h3>$1</h3>'); // For `HEADER` -> <h3>
-                    aiGeneratedContent = aiGeneratedContent.replace(/^• (.*)$/gm, '<li>$1</li>'); // Convert • to li
+                    // Apply WhatsApp formatting to HTML
+                    aiGeneratedContent = aiGeneratedContent.replace(/\*(.*?)\*/g, '<strong>$1</strong>'); // Bold *text*
+                    aiGeneratedContent = aiGeneratedContent.replace(/_(.*?)_/g, '<em>$1</em>');       // Italic _text_
+                    aiGeneratedContent = aiGeneratedContent.replace(/~(.*?)~/g, '<del>$1</del>');       // Strikethrough ~text~
+                    
+                    // Monospace and Inline code require careful handling to avoid conflicts.
+                    // Replace monospace first, which uses three backticks.
+                    aiGeneratedContent = aiGeneratedContent.replace(/```(.*?)```/gs, '<pre><code>$1</code></pre>'); // Monospace ```text```
+                    // Then replace inline code, which uses single backticks.
+                    aiGeneratedContent = aiGeneratedContent.replace(/`(.*?)`/g, '<code>$1</code>');       // Inline code `text`
 
-                    // Wrap li's in ul, if any were created. This is a very basic attempt.
+                    // Quote conversion: > text -> | text
+                    aiGeneratedContent = aiGeneratedContent.replace(/^> (.*)$/gm, '<blockquote>$1</blockquote>');
+
+                    // Bulleted list conversion: * text or - text
+                    // This regex attempts to find lines starting with * or - and wrap them in <li> within a <ul>
+                    aiGeneratedContent = aiGeneratedContent.replace(/(\*|\-)\s(.*?)(\n|$)/g, '<li>$2</li>');
                     if (aiGeneratedContent.includes('<li>')) {
                         // This regex tries to find groups of <li> and wrap them in <ul>.
                         // It's not perfect for complex nested lists but works for simple flat ones.
-                        aiGeneratedContent = aiGeneratedContent.replace(/(<li>.*?<\/li>[\n\s]*)+/gs, '<ul>$&</ul>');
+                        // We also need to prevent wrapping lists inside lists or other blocks.
+                        // A more robust way would involve parsing, but for simple cases, this aims to aggregate.
+                        let tempContent = aiGeneratedContent;
+                        let listMatches = [];
+                        let ulPattern = /(<li>.*?<\/li>[\n\s]*)+/gs;
+                        let match;
+
+                        while ((match = ulPattern.exec(tempContent)) !== null) {
+                            listMatches.push({
+                                start: match.index,
+                                end: match.index + match[0].length,
+                                content: `<ul>${match[0]}</ul>`
+                            });
+                        }
+
+                        // Reconstruct content, replacing found list items with ul wrapped ones
+                        let lastIndex = 0;
+                        let newContentParts = [];
+                        listMatches.forEach(listMatch => {
+                            newContentParts.push(tempContent.substring(lastIndex, listMatch.start));
+                            newContentParts.push(listMatch.content);
+                            lastIndex = listMatch.end;
+                        });
+                        newContentParts.push(tempContent.substring(lastIndex));
+                        aiGeneratedContent = newContentParts.join('');
                     }
 
 
                     adviceDisplay.innerHTML = aiGeneratedContent;
                     adviceDisplay.classList.add('show');
-                    // Clear custom topic input after generation
+                    // Clear custom topic input after successful generation
                     customTopicInput.value = '';
 
                 } else {
+                    // Handle cases where AI response structure is unexpected or empty
                     adviceDisplay.innerHTML = `<div class="error-message">Wystąpił problem z wygenerowaniem porady. Spróbuj ponownie.</div>`;
                     adviceDisplay.classList.add('show');
                     console.error("Nieoczekiwana struktura odpowiedzi API lub brak treści:", result);
                 }
 
             } catch (error) {
+                // Handle network or API call errors
                 adviceDisplay.innerHTML = `<div class="error-message">Błąd połączenia: ${error.message}. Spróbuj ponownie później.</div>`;
                 adviceDisplay.classList.add('show');
                 console.error("Błąd podczas wywoływania API Gemini:", error);
             }
         }
 
+        /**
+         * Copies the last generated raw advice content to the clipboard.
+         * Provides visual feedback to the user upon successful copy.
+         */
         function copyAdvice() {
             if (!lastGeneratedRawContent) {
-                // Inform user if there's no advice to copy
+                // Inform user if there's no advice to copy yet
                 const adviceDisplay = document.getElementById('adviceDisplay');
                 adviceDisplay.innerHTML = '<p class="loading-indicator">Brak porady do skopiowania. Wygeneruj ją najpierw!</p>';
                 adviceDisplay.classList.add('show');
                 return;
             }
 
+            // Create a temporary textarea to hold the content for copying
             const tempTextArea = document.createElement('textarea');
             tempTextArea.value = lastGeneratedRawContent;
-            document.body.appendChild(tempTextArea);
-            tempTextArea.select();
-            document.execCommand('copy');
-            document.body.removeChild(tempTextArea);
+            document.body.appendChild(tempTextArea); // Append to body to make it selectable
+            tempTextArea.select(); // Select the text
+            document.execCommand('copy'); // Execute copy command
+            document.body.removeChild(tempTextArea); // Remove the temporary textarea
 
-            // Zapewnienie wizualnej informacji zwrotnej
+            // Provide visual feedback on the button
             const copyButton = document.querySelector('.copy-button');
             const originalText = copyButton.textContent;
             copyButton.textContent = 'Skopiowano! ✅';
             setTimeout(() => {
-                copyButton.textContent = originalText;
+                copyButton.textContent = originalText; // Revert button text after a delay
             }, 2000);
         }
     </script>
