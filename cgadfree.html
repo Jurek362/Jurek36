@@ -1,0 +1,600 @@
+<!DOCTYPE html>
+<html lang="pl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Generator Porad Cleangirl (AI) - WhatsApp Style</title>
+    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@300;400;600;700&display=swap" rel="stylesheet">
+    <style>
+        /* General body styling */
+        body {
+            font-family: 'Montserrat', sans-serif;
+            background: linear-gradient(to right, #fdfbfb, #ebedee);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            margin: 0;
+            color: #333;
+            padding: 20px;
+            box-sizing: border-box;
+        }
+
+        /* Container for the main application content */
+        .container {
+            background-color: #ffffff;
+            border-radius: 15px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.08);
+            padding: 40px;
+            max-width: 700px;
+            width: 100%;
+            text-align: center;
+        }
+
+        /* Heading style */
+        h1 {
+            color: #7B68EE; /* MediumSlateBlue */
+            margin-bottom: 30px;
+            font-size: 2.2em;
+            font-weight: 700;
+        }
+
+        /* Input group styling for topic input */
+        .input-group {
+            margin-bottom: 20px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+
+        .input-group label {
+            margin-bottom: 10px;
+            font-size: 1em;
+            color: #555;
+            font-weight: 600;
+        }
+
+        .input-group input[type="text"] {
+            width: calc(100% - 40px);
+            max-width: 400px;
+            padding: 12px 20px;
+            border: 1px solid #ddd;
+            border-radius: 25px;
+            font-size: 1em;
+            transition: border-color 0.3s ease, box-shadow 0.3s ease;
+            box-sizing: border-box;
+        }
+
+        .input-group input[type="text"]:focus {
+            outline: none;
+            border-color: #DA70D6; /* Orchid */
+            box-shadow: 0 0 0 3px rgba(218, 112, 214, 0.2);
+        }
+
+        /* Button group layout */
+        .button-group {
+            display: flex;
+            justify-content: center;
+            gap: 20px; /* Space between buttons */
+            margin-bottom: 40px;
+            flex-wrap: wrap; /* Allow buttons to wrap on smaller screens */
+        }
+
+        /* Common button styles */
+        .advice-button, .copy-button {
+            background-color: #9370DB; /* MediumPurple */
+            color: white;
+            border: none;
+            padding: 15px 30px;
+            border-radius: 30px;
+            font-size: 1.1em;
+            font-weight: 600;
+            cursor: pointer;
+            transition: background-color 0.3s ease, transform 0.2s ease, box-shadow 0.3s ease;
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+        }
+
+        .advice-button:hover, .copy-button:hover {
+            background-color: #8A2BE2; /* BlueViolet */
+            transform: translateY(-2px);
+        }
+
+        .advice-button:active, .copy-button:active {
+            transform: translateY(0);
+        }
+
+        /* Specific style for copy button */
+        .copy-button {
+            background-color: #DA70D6; /* Orchid */
+        }
+
+        .copy-button:hover {
+            background-color: #C71585; /* MediumVioletRed */
+        }
+
+        /* Advice display area */
+        #adviceDisplay {
+            margin-top: 30px;
+            background-color: #f9f9f9;
+            border-left: 5px solid #DA70D6; /* Orchid */
+            padding: 25px;
+            border-radius: 10px;
+            text-align: left;
+            opacity: 1; /* Default to visible for initial message */
+            transform: translateY(0);
+            transition: opacity 0.5s ease, transform 0.5s ease;
+            min-height: 100px; /* Ensure space for loading indicator */
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            white-space: pre-wrap; /* Preserve whitespace and line breaks from AI */
+            line-height: 1.6; /* Adjust line height for readability */
+            font-size: 1em; /* Default font size for generated text */
+            word-wrap: break-word; /* Ensure long words break */
+        }
+        #adviceDisplay pre {
+            white-space: pre-wrap;
+            word-break: break-all;
+            background-color: #eee;
+            padding: 10px;
+            border-radius: 5px;
+        }
+        #adviceDisplay code {
+            font-family: monospace;
+            background-color: #eee;
+            padding: 2px 4px;
+            border-radius: 3px;
+        }
+
+        /* Class to show/hide the advice display with transition */
+        #adviceDisplay.show {
+            opacity: 1;
+            transform: translateY(0);
+        }
+
+        /* Basic styling for content generated by AI, which uses Markdown */
+        #adviceDisplay strong, #adviceDisplay b {
+            font-weight: 700;
+            color: #9370DB; /* MediumPurple */
+        }
+        #adviceDisplay em, #adviceDisplay i {
+            font-style: italic;
+            color: #DA70D6; /* Orchid */
+        }
+        #adviceDisplay blockquote {
+            border-left: none; /* Remove standard blockquote border */
+            margin: 1em 0;
+            padding-left: 0;
+            color: #555;
+            font-style: italic;
+            position: relative;
+        }
+        #adviceDisplay blockquote::before {
+            content: '| '; /* Add WhatsApp quote pipe */
+            color: #DA70D6; /* Orchid */
+            font-weight: bold;
+            position: absolute;
+            left: 0;
+        }
+        #adviceDisplay ul {
+            list-style: none; /* Remove default bullets */
+            padding-left: 0; /* Adjust as needed */
+            margin: 0;
+        }
+        #adviceDisplay ul li {
+            position: relative;
+            margin-bottom: 5px;
+            color: #555;
+            padding-left: 1.2em; /* Space for custom bullet */
+        }
+        #adviceDisplay ul li::before {
+            content: '* '; /* Use asterisk as bullet, as per WhatsApp style */
+            color: #9370DB; /* MediumPurple */
+            font-weight: bold;
+            position: absolute;
+            left: 0;
+        }
+
+        /* Loading indicator animation */
+        #adviceDisplay .loading-indicator {
+            font-size: 1.2em;
+            color: #9370DB;
+            animation: pulse 1.5s infinite ease-in-out;
+            text-align: center;
+        }
+
+        @keyframes pulse {
+            0% { opacity: 0.5; }
+            50% { opacity: 1; }
+            100% { opacity: 0.5; }
+        }
+
+        /* Responsive adjustments for smaller screens */
+        @media (max-width: 600px) {
+            .container {
+                padding: 25px;
+            }
+
+            h1 {
+                font-size: 1.8em;
+            }
+
+            .input-group input[type="text"] {
+                width: calc(100% - 20px);
+                padding: 10px 15px;
+            }
+
+            .advice-button, .copy-button {
+                padding: 12px 20px;
+                font-size: 1em;
+            }
+
+            .button-group {
+                flex-direction: column;
+                gap: 10px;
+            }
+        }
+    </style>
+</head>
+<body>
+
+    <div class="container">
+        <h1>Generator Porad dla Cleangirls ✨</h1>
+        <div class="input-group">
+            <label for="customTopicInput">Wpisz swój temat (opcjonalnie):</label>
+            <input type="text" id="customTopicInput" placeholder="Np. 'jak dbać o rośliny', 'wakacje'">
+        </div>
+        <div class="button-group">
+            <button class="advice-button" onclick="generateAdvice()">Wygeneruj nową poradę!</button>
+            <button class="copy-button" onclick="copyAdvice()">Kopiuj poradę</button>
+        </div>
+        <div id="adviceDisplay">
+            <!-- Initial message/loading indicator -->
+            <p class="loading-indicator">Wpisz temat i kliknij "Wygeneruj nową poradę!", aby rozpocząć!</p>
+        </div>
+    </div>
+
+    <script>
+        let lastGeneratedRawContent = ""; // Global variable to store the raw, formatted content from AI for copying
+
+        // Default categories for advice if no custom topic is provided
+        const defaultAdviceCategories = [
+            "przyjaźń", "nauka", "samoopieka", "motywacja", "styl i wizerunek",
+            "finanse", "zdrowie", "relacje", "produktywność", "rozwój osobisty"
+        ];
+
+        /**
+         * Generates a new piece of advice based on a custom topic or a random default category.
+         * It interacts with the Gemini API to get AI-generated content.
+         */
+        async function generateAdvice() {
+            const customTopicInput = document.getElementById('customTopicInput');
+            const customTopic = customTopicInput.value.trim();
+
+            const adviceDisplay = document.getElementById('adviceDisplay');
+            adviceDisplay.classList.remove('show'); // Hide for transition
+            adviceDisplay.innerHTML = '<div class="loading-indicator">Generowanie porady...</div>'; // Show loading indicator
+            adviceDisplay.classList.add('show'); // Show loading indicator with transition
+
+            let currentTopicName;
+
+            // Determine the topic for advice generation
+            if (customTopic) {
+                currentTopicName = customTopic;
+            } else {
+                const randomCategoryName = defaultAdviceCategories[Math.floor(Math.random() * defaultAdviceCategories.length)];
+                currentTopicName = randomCategoryName;
+            }
+
+            // Prepare the detailed prompt for the AI, emphasizing WhatsApp formatting and "cleangirl" style.
+            // All backticks meant to be literal for AI formatting are escaped with an extra backslash.
+            const prompt = `Jesteś "cleangirl" i chcesz stworzyć kompletny poradnik na temat *${currentTopicName}*.
+            Twoim zadaniem jest wygenerowanie 3-6 porad, które będą miały **bardzo dużo formatowania** (tylko w stylu WhatsApp), emotikonów Unicode (gwiazdki, serca, niestandardowe kulki, ozdobne linie itp.) i będą wyglądać jak gotowy do wklejenia post na WhatsAppie lub Instagramie.
+            Styl powinien być "cleangirl": pozytywny, inspirujący, praktyczny, z lekkim i przyjaznym tonem.
+            Każda porada powinna być długa (2-5 zdań) i szczegółowa.
+
+            **Koniecznie używaj WYŁĄCZNIE poniższego formatowania tekstowego w stylu WhatsApp:**
+            - Kursywa: \`_text_\` (np. _Twoja porada_)
+            - Pogrubienie: \`*text*\` (np. *ważna informacja*)
+            - Przekreślenie: \`~text~\` (np. ~stare podejście~)
+            - Monospace: \`\`\`text\`\`\` (np. \\\`\\\`\\\`kod lub specjalny tekst\\\`\\\`\\\`)
+            - Cytat: \`> text\` (np. > Moja myśl)
+            - Inline code: \`\`text\`\` (np. \\\`mały fragment kodu\\\`)
+            - Lista punktowa:
+                \`* text\`
+                \`* text\`
+                LUB
+                \`- text\`
+                \`- text\`
+            - NIE UŻYWAJ żadnego innego formatowania, np. /tekst/, \\tekst\\.
+            - Na koniec dodaj frazę "Zostaw (emotka związana z tematem) dla motywacji", np. "Zostaw ❤️ dla motywacji". Wybierz emotkę pasującą do tematu porady.
+            - Na koniec NIE dodawaj żadnego podpisu ani imienia. Po prostu zakończ porady.
+            - Używaj szerokiej gamy emotikonów Unicode (takich jak: 🧋🫂💬, 🎄🍊✨, 🫶🏻🏝️ৎ, 😝🤙🏻, 🥂🌊, 😻🫶🏻, 🫂🏝️, 🥂🤍, 🌙💫, 🪄🌸🎧, 🎀✨, 💖🎀, 🦋💫, 🌸💌, 🍀🌈, 💎🌿, 🌟💖, 💡📓, 🧘‍♀️💆‍♀️, 💅🛍️, 💰📈, 🍎🏋️‍♀️, 🤝🗣️, 🗓️⏰, 🌱✨, 💍, ✈️, ☀️, 🫂, 🩰, 🏄🏼‍♀️, 🌺, 🏝️, 🤍, 🥥, 🎧, 🍃, 🕊️, 🧠, 📚, 🕒, 📖, 😊, 🏃, 🌷, 💭, 🍵, 🕯️, 🤞🏻, 💐, 🌴, 😻, 🏡, 🍪, 📦, 📓, 📸, 🎶, 🥛, 🍨, 💋, 🤭, 😵‍💫, 🥹, 🦈, 🫖, 🧇, 🥞, 🥗, 🦩, 🪼, 🧺, 📦, 📓, 📸, 🎶, 🥛, 🍨, 💋, 🤭, 😵‍💫, 🥹, 🦈, 🫖, 🧇, 🥞, 🥗, 👑, 🙌🏻, 🐆, 📵, 🫧, 🐚, 🍯, 🍓, ☕, 🥝, 🎨, 💗, 🕊️, 🙈).
+
+            Zwróć **cały gotowy tekst** porady (wraz z wprowadzeniem) jako jedną ciągłą odpowiedź. Nie dodawaj żadnego innego tekstu przed ani po wygenerowanym bloku porad. Wybierz jeden z poniższych stylów formatowania i zastosuj go konsekwentnie w całej generowanej poradzie.
+
+            --- PRZYKŁADY OCZEKIWANEGO FORMATU I STYLU ---
+
+            Pewnie! Oto nowa, świeża porada – temat: _przyjaźń_:
+
+            *PORADY NA TEMAT PRZYJAŹNI* 🧋🫂💬
+            ୨────୨ৎ────ৎ
+            > Słuchaj naprawdę
+            _Nie przerywaj, nie oceniaj – po prostu bądź obecna. Czasem to wystarczy, żeby ktoś poczuł się *ważny* i wysłuchany. Prawdziwa przyjaźń opiera się na głębokim zrozumieniu i wsparciu, które budują silną więź. ✨_
+
+            > Bądź sobą
+            _Nie udawaj kogoś, kim nie jesteś, żeby komuś zaimponować. *Prawdziwa przyjaźń* nie potrzebuje masek ani udawania. Autentyczność to klucz do trwałych relacji, gdzie możesz czuć się swobodnie i bezpiecznie. 💖_
+
+            > Odpisuj, nawet krótko
+            _Nie musisz pisać elaboratu za każdym razem. Nawet szybkie „Hej, widziałam, dzięki!” czy „Później pogadamy!” pokazuje, że Ci zależy i pamiętasz o drugiej osobie. *Małe gesty* budują poczucie bliskości. 🎀_
+
+            > Nie bój się przeprosić
+            _Jeśli coś zepsułaś – przyznaj to. Przyjaciel nie oczekuje perfekcji, tylko szczerości i gotowości do naprawienia błędu. Umiejętność przepraszania pokazuje *dojrzałość* i szacunek dla Waszej relacji. 🌷_
+
+            > Ciesz się z sukcesów drugiej osoby
+            _To nie wyścig ani rywalizacja. Jeśli ktoś z Twoich ludzi coś osiąga – *świętuj razem z nim*! Szczerze okazywana radość wzmacnia więź i buduje wzajemne zaufanie. To prawdziwa definicja wsparcia. 🚀_
+            Zostaw 🫂 dla motywacji!
+
+            ---
+
+            ᯓ *_\\\`NO MORE BOREDOM\\\`_* 💿🫖
+            _୨ৎ *czyli kilka pomysłów na nudę!* ୨ৎ_
+            ⋆₊˚⊹ ──── •.° ୨ৎ °.• ──── ⋆₊˚⊹
+            * Wypróbuj prosty przepis na coś słodkiego 🍪
+            * Posprzątaj w szufladzie albo miejscu, które odkładasz na później 📦
+            * Zacznij pisać notatki albo dziennik 📓
+            * Zrób kilka ładnych zdjęć rzeczy z twojego pokoju 📸
+            * Stwórz nową playlistę na Spotify 🎶
+            ⋆₊˚⊹ ──── •.° ୨ৎ °.• ──── ⋆₊˚⊹
+            *ᯓᡣ𐭩 zostaw ❤️ dla motywacji*
+
+            ---
+
+            _Good morning!_ 🧇
+
+            > Jak tam, wyspane? 🥂
+            > Ja nawet tak! 🫧
+
+            > Macie jakieś plany na dziś? 🐚
+            > Ja muszę się pouczyć matmy na jutrzejszą kartkówkę 🤍
+
+            > Łapcie śniadanko, jeśli jeszcze nie jadłyście »🥛🍨«!
+            > Miłego dnia, powodzenia w szkole! 💋
+            Zostaw 🤍 dla motywacji!
+
+            ---
+
+            𓇼𝑊𝑒_જ⁀➴ *Good morning* ☀️!
+            > Wyspane🤞🏻?
+            > Ja średnio ostatnio nie umiem się wysypać [hah] 🤭
+
+            > Śniadanko dla was girls 🤘🏻!
+            > \\\`\\\`\\\`🥞🥗🍵🧇\\\`\\\`\\\`
+
+            > Macie jakieś plany 🥂?
+            > Ja mam w planach naukę na jutrzejszy sprawdzian z matmy 😵‍💫🥹!
+
+            > Miłego dnia💗!
+            > Postaram się napisać dziś dużo poradek (nie obiecuję) 🤍😽!
+            Zostaw 💗 dla motywacji!
+
+            ---
+
+            _⋆.˚ᝰNatal𐙚 *PORADY* 🤍🥂🫶🏻
+            ~ _zdrowy tryb życiaa_ 🥬~
+            ∘⁠˚⁠˳⁠° ──── ౨ৎ ────∘⁠˚⁠˳⁠°
+            * _pij dużo wody! to bardzo wazne_ 🌊
+
+            * _poranna joga? zdecydowanie tak!_ 🏄🏼‍♀️
+
+            * _jedz zdrowe rzeczy np. sałatki warzywne/owocowe lub fit deserki!_ 🥂
+
+            * _rób pielęgnację skóry! będziesz mieć piękną i zdrową_ 🌺
+
+            * _zmieniaj co tydzień poszewkę na poduszkę! wtedy wszystkie tego typu bakterie które się zbierają znikną!_ 😻
+            ∘⁠˚⁠˳⁠° ──── ౨ৎ ────∘⁠˚⁠˳⁠°
+            Zostaw 🌱 dla motywacji!
+
+            ---
+
+            ᝰ. _nie wiesz jak się ubrać? pozwól że ci pomogę śliczna!_ 🌺🥂🫶🏻
+            _p 2_ 🫂
+            ────୨ৎ────
+            - _jasno różowe baggy dresy + jasno różowa biała koszulka (na długi rękaw) + białe nike_ 🥥
+
+            - _szare dresy + biały top (na długi rękaw) + szare nike_ 🍵
+
+            - _niebieskie baggy jeansy + biały top z hibiskusem + adidas campusy (szare)_ 🚀
+
+            - _ciemno szara bluzka (na długi rękaw) + ciemno niebiesko - zielone baggy jeansy + różowe nike_ ☀️
+            ────୨ৎ────
+            Zostaw 🛍️ dla motywacji!
+
+            ---
+
+            ᝰ. *JOURNAL IDEAS* 🫶🏻🥥🍵
+            > *czyli pomysły co zapisać w pamiętniku!* 🫂🥂
+            ୨────୨ৎ────ৎ
+            * _about me_ 🫶🏻
+            * _przepisy_ 👑
+            * _hasła do aplikacji_ 🌺
+            * _wishlist_ ✈️
+            * _rutyna skincare_ 🌴
+            * _urodziny przyjaciół_ 💍
+            * _podroze (miejsca w których był*ś)_ 🏄🏼‍♀️
+            * _oszczędzanie_ 🤍
+            * _anielskie liczby_ 🚀
+            * _kalendarz_ 🙌🏻
+            * _książki które przeczytał*ś_ 🐆
+            ୨────୨ৎ────ৎ
+            _jak oceniacie poradkę?_ 😝
+            Zostaw 📓 dla motywacji!
+
+            ---
+
+            \\\`selfcare night — wieczór tylko dla siebie!\\\`🛁🕯️💗
+
+            𓂃 ₊˚⊹ \\\`zacznij od odłożenia telefonu.\\\` 🌴
+            _to Twój czas offline — świat poczeka 📵✨_
+            ≻───── ⋆✩⋆ ─────≺
+            * *\\\`ciepły prysznic lub kąpiel\\\`* 🪼
+            _użyj pachnącego żelu, zapal świeczkę i pozwól sobie na relaks 🛁🫧🕯️_
+            ≻───── ⋆✩⋆ ─────≺
+            * *\\\`maska na twarz, olejek na włosy\\\`*🌊
+            _zadbaj o siebie jak o najlepszą przyjaciółkę 💆‍♀️🍯_
+            ≻───── ⋆✩⋆ ─────≺
+            * *\\\`ulubiony napój + coś lekkiego\\\`*🍹
+            _herbatka, kakao, może owoce? 🍓☕🥝_
+            ≻───── ⋆✩⋆ ─────≺
+            * *\\\`coś co cię uspokoi\\\`*🥥
+            _książka, journaling, malowanie, muzyka – cokolwiek działa na Twoją duszę 🎶📖🎨_
+            ≻───── ⋆✩⋆ ─────≺
+            * *\\\`spisz 3 rzeczy, za które  dzis dziękujesz\\\`*🧺
+            _wdzięczność koi serce 💗🕊️_
+            ≻───── ⋆✩⋆ ─────≺
+            ˗ˏˋ 💌 _Bo czas dla siebie to nie luksus — to potrzeba._ ˎˊ˗
+            *jesteś ważna. zasługujesz  na chwile spokoju*🙈
+
+            _zareguj „🦩” po poranne selfcare_
+            Zostaw 🛀 dla motywacji!
+
+            ---
+            `;
+
+            let chatHistory = [];
+            chatHistory.push({ role: "user", parts: [{ text: prompt }] });
+
+            const payload = {
+                contents: chatHistory,
+                generationConfig: {
+                    // Expect AI to return raw text with Markdown/Unicode formatting
+                    responseMimeType: "text/plain"
+                }
+            };
+
+            // Your API key is preserved.
+            const apiKey = "AIzaSyChSd5TnsmPwLYZAQclq_al2WC4KVULWNg";
+            const apiUrl = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=${apiKey}`;
+
+            try {
+                const response = await fetch(apiUrl, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(payload)
+                });
+
+                if (!response.ok) {
+                    throw new Error(`HTTP error! status: ${response.status}`);
+                }
+
+                const result = await response.json();
+                console.log("Raw API response:", result);
+
+                if (result.candidates && result.candidates.length > 0 &&
+                    result.candidates[0].content && result.candidates[0].content.parts &&
+                    result.candidates[0].content.parts.length > 0) {
+                    let aiGeneratedContent = result.candidates[0].content.parts[0].text;
+                    lastGeneratedRawContent = aiGeneratedContent; // Store raw content for copying
+
+                    // Apply WhatsApp formatting to HTML
+                    aiGeneratedContent = aiGeneratedContent.replace(/\*(.*?)\*/g, '<strong>$1</strong>'); // Bold *text*
+                    aiGeneratedContent = aiGeneratedContent.replace(/_(.*?)_/g, '<em>$1</em>');       // Italic _text_
+                    aiGeneratedContent = aiGeneratedContent.replace(/~(.*?)~/g, '<del>$1</del>');       // Strikethrough ~text~
+                    
+                    // Monospace and Inline code require careful handling to avoid conflicts.
+                    // Replace monospace first, which uses three backticks.
+                    aiGeneratedContent = aiGeneratedContent.replace(/```(.*?)```/gs, '<pre><code>$1</code></pre>'); // Monospace ```text```
+                    // Then replace inline code, which uses single backticks.
+                    aiGeneratedContent = aiGeneratedContent.replace(/`(.*?)`/g, '<code>$1</code>');       // Inline code `text`
+
+                    // Quote conversion: > text -> | text
+                    aiGeneratedContent = aiGeneratedContent.replace(/^> (.*)$/gm, '<blockquote>$1</blockquote>');
+
+                    // Bulleted list conversion: * text or - text
+                    // This regex attempts to find lines starting with * or - and wrap them in <li> within a <ul>
+                    aiGeneratedContent = aiGeneratedContent.replace(/(\*|\-)\s(.*?)(\n|$)/g, '<li>$2</li>');
+                    if (aiGeneratedContent.includes('<li>')) {
+                        // This regex tries to find groups of <li> and wrap them in <ul>.
+                        // It's not perfect for complex nested lists but works for simple flat ones.
+                        // We also need to prevent wrapping lists inside lists or other blocks.
+                        // A more robust way would involve parsing, but for simple cases, this aims to aggregate.
+                        let tempContent = aiGeneratedContent;
+                        let listMatches = [];
+                        let ulPattern = /(<li>.*?<\/li>[\n\s]*)+/gs;
+                        let match;
+
+                        while ((match = ulPattern.exec(tempContent)) !== null) {
+                            listMatches.push({
+                                start: match.index,
+                                end: match.index + match[0].length,
+                                content: `<ul>${match[0]}</ul>`
+                            });
+                        }
+
+                        // Reconstruct content, replacing found list items with ul wrapped ones
+                        let lastIndex = 0;
+                        let newContentParts = [];
+                        listMatches.forEach(listMatch => {
+                            newContentParts.push(tempContent.substring(lastIndex, listMatch.start));
+                            newContentParts.push(listMatch.content);
+                            lastIndex = listMatch.end;
+                        });
+                        newContentParts.push(tempContent.substring(lastIndex));
+                        aiGeneratedContent = newContentParts.join('');
+                    }
+
+
+                    adviceDisplay.innerHTML = aiGeneratedContent;
+                    adviceDisplay.classList.add('show');
+                    // Clear custom topic input after successful generation
+                    customTopicInput.value = '';
+
+                } else {
+                    // Handle cases where AI response structure is unexpected or empty
+                    adviceDisplay.innerHTML = `<div class="error-message">Wystąpił problem z wygenerowaniem porady. Spróbuj ponownie.</div>`;
+                    adviceDisplay.classList.add('show');
+                    console.error("Nieoczekiwana struktura odpowiedzi API lub brak treści:", result);
+                }
+
+            } catch (error) {
+                // Handle network or API call errors
+                adviceDisplay.innerHTML = `<div class="error-message">Błąd połączenia: ${error.message}. Spróbuj ponownie później.</div>`;
+                adviceDisplay.classList.add('show');
+                console.error("Błąd podczas wywoływania API Gemini:", error);
+            }
+        }
+
+        /**
+         * Copies the last generated raw advice content to the clipboard.
+         * Provides visual feedback to the user upon successful copy.
+         */
+        function copyAdvice() {
+            if (!lastGeneratedRawContent) {
+                // Inform user if there's no advice to copy yet
+                const adviceDisplay = document.getElementById('adviceDisplay');
+                adviceDisplay.innerHTML = '<p class="loading-indicator">Brak porady do skopiowania. Wygeneruj ją najpierw!</p>';
+                adviceDisplay.classList.add('show');
+                return;
+            }
+
+            // Create a temporary textarea to hold the content for copying
+            const tempTextArea = document.createElement('textarea');
+            tempTextArea.value = lastGeneratedRawContent;
+            document.body.appendChild(tempTextArea); // Append to body to make it selectable
+            tempTextArea.select(); // Select the text
+            document.execCommand('copy'); // Execute copy command
+            document.body.removeChild(tempTextArea); // Remove the temporary textarea
+
+            // Provide visual feedback on the button
+            const copyButton = document.querySelector('.copy-button');
+            const originalText = copyButton.textContent;
+            copyButton.textContent = 'Skopiowano! ✅';
+            setTimeout(() => {
+                copyButton.textContent = originalText; // Revert button text after a delay
+            }, 2000);
+        }
+    </script>
+
+</body>
+</html>
