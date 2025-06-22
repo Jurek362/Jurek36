@@ -14,6 +14,8 @@
 
     <title>Generator Porad Cleangirl (AI) - WhatsApp Style</title>
     <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@300;400;600;700&display=swap" rel="stylesheet">
+    <!-- Font Awesome for icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
     <style>
         /* General body styling */
         body {
@@ -27,9 +29,15 @@
             color: #333;
             padding: 20px;
             box-sizing: border-box;
+            transition: background-color 0.3s ease, color 0.3s ease;
         }
 
-        /* Container for the main application content */
+        /* Dark Mode styles */
+        body.dark-mode {
+            background: linear-gradient(to right, #2c3e50, #34495e);
+            color: #ecf0f1;
+        }
+
         .container {
             background-color: #ffffff;
             border-radius: 15px;
@@ -38,9 +46,14 @@
             max-width: 700px;
             width: 100%;
             text-align: center;
+            transition: background-color 0.3s ease, box-shadow 0.3s ease;
         }
 
-        /* Heading style */
+        body.dark-mode .container {
+            background-color: #3b5066;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+        }
+
         h1 {
             color: #7B68EE; /* MediumSlateBlue */
             margin-bottom: 30px;
@@ -48,7 +61,10 @@
             font-weight: 700;
         }
 
-        /* Input group styling for topic input */
+        body.dark-mode h1 {
+            color: #a78bfa; /* Lighter purple for dark mode */
+        }
+
         .input-group {
             margin-bottom: 20px;
             display: flex;
@@ -63,6 +79,10 @@
             font-weight: 600;
         }
 
+        body.dark-mode .input-group label {
+            color: #bdc3c7;
+        }
+
         .input-group input[type="text"] {
             width: calc(100% - 40px);
             max-width: 400px;
@@ -70,8 +90,16 @@
             border: 1px solid #ddd;
             border-radius: 25px;
             font-size: 1em;
-            transition: border-color 0.3s ease, box-shadow 0.3s ease;
+            transition: border-color 0.3s ease, box-shadow 0.3s ease, background-color 0.3s ease, color 0.3s ease;
             box-sizing: border-box;
+            background-color: #f8f8f8;
+            color: #333;
+        }
+
+        body.dark-mode .input-group input[type="text"] {
+            background-color: #4a657e;
+            border-color: #5e7992;
+            color: #ecf0f1;
         }
 
         .input-group input[type="text"]:focus {
@@ -79,8 +107,10 @@
             border-color: #DA70D6; /* Orchid */
             box-shadow: 0 0 0 3px rgba(218, 112, 214, 0.2);
         }
+        body.dark-mode .input-group input[type="text"]:focus {
+            box-shadow: 0 0 0 3px rgba(186, 85, 211, 0.3); /* Darker orchid for dark mode focus */
+        }
 
-        /* Button group layout */
         .button-group {
             display: flex;
             justify-content: center;
@@ -89,8 +119,7 @@
             flex-wrap: wrap; /* Allow buttons to wrap on smaller screens */
         }
 
-        /* Common button styles */
-        .advice-button, .copy-button {
+        .advice-button, .copy-button, .fav-button, .share-button, .theme-toggle-button {
             background-color: #9370DB; /* MediumPurple */
             color: white;
             border: none;
@@ -103,12 +132,12 @@
             box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
         }
 
-        .advice-button:hover, .copy-button:hover {
+        .advice-button:hover, .copy-button:hover, .fav-button:hover, .share-button:hover, .theme-toggle-button:hover {
             background-color: #8A2BE2; /* BlueViolet */
             transform: translateY(-2px);
         }
 
-        .advice-button:active, .copy-button:active {
+        .advice-button:active, .copy-button:active, .fav-button:active, .share-button:active, .theme-toggle-button:active {
             transform: translateY(0);
         }
 
@@ -121,7 +150,47 @@
             background-color: #C71585; /* MediumVioletRed */
         }
 
-        /* Advice display area */
+        /* Favorite and Share buttons */
+        .fav-button, .share-button {
+            background-color: #20B2AA; /* LightSeaGreen */
+            padding: 10px 20px; /* Smaller padding */
+            font-size: 0.9em;
+            margin-top: 10px;
+        }
+        .fav-button:hover, .share-button:hover {
+            background-color: #008080; /* Teal */
+        }
+
+        body.dark-mode .advice-button,
+        body.dark-mode .copy-button,
+        body.dark-mode .fav-button,
+        body.dark-mode .share-button,
+        body.dark-mode .theme-toggle-button {
+            background-color: #a78bfa;
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
+        }
+        body.dark-mode .advice-button:hover,
+        body.dark-mode .copy-button:hover,
+        body.dark-mode .fav-button:hover,
+        body.dark-mode .share-button:hover,
+        body.dark-mode .theme-toggle-button:hover {
+            background-color: #8b5cf6;
+        }
+
+        body.dark-mode .copy-button {
+            background-color: #b785d1;
+        }
+        body.dark-mode .copy-button:hover {
+            background-color: #9b5cc1;
+        }
+        body.dark-mode .fav-button, body.dark-mode .share-button {
+            background-color: #4CAF50; /* Green for dark mode */
+        }
+        body.dark-mode .fav-button:hover, body.dark-mode .share-button:hover {
+            background-color: #388E3C; /* Darker green */
+        }
+
+
         #adviceDisplay {
             margin-top: 30px;
             background-color: #f9f9f9;
@@ -129,19 +198,25 @@
             padding: 25px;
             border-radius: 10px;
             text-align: left;
-            opacity: 1; /* Default to visible for initial message */
+            opacity: 1;
             transform: translateY(0);
-            transition: opacity 0.5s ease, transform 0.5s ease;
-            min-height: 100px; /* Ensure space for loading indicator */
+            transition: opacity 0.5s ease, transform 0.5s ease, background-color 0.3s ease;
+            min-height: 100px;
             display: flex;
             flex-direction: column;
             justify-content: center;
             align-items: center;
-            white-space: pre-wrap; /* Preserve whitespace and line breaks from AI */
-            line-height: 1.6; /* Adjust line height for readability */
-            font-size: 1em; /* Default font size for generated text */
-            word-wrap: break-word; /* Ensure long words break */
+            white-space: pre-wrap;
+            line-height: 1.6;
+            font-size: 1em;
+            word-wrap: break-word;
         }
+
+        body.dark-mode #adviceDisplay {
+            background-color: #4a657e;
+            border-left-color: #b785d1;
+        }
+
         #adviceDisplay pre {
             white-space: pre-wrap;
             word-break: break-all;
@@ -149,31 +224,47 @@
             padding: 10px;
             border-radius: 5px;
         }
+        body.dark-mode #adviceDisplay pre {
+            background-color: #5e7992;
+            color: #ecf0f1;
+        }
         #adviceDisplay code {
             font-family: monospace;
             background-color: #eee;
             padding: 2px 4px;
             border-radius: 3px;
         }
+        body.dark-mode #adviceDisplay code {
+            background-color: #5e7992;
+            color: #ecf0f1;
+        }
 
-        /* Class to show/hide the advice display with transition */
         #adviceDisplay.show {
             opacity: 1;
             transform: translateY(0);
         }
 
-        /* Basic styling for content generated by AI, which uses Markdown */
+        /* Markdown styling for generated content */
         #adviceDisplay strong, #adviceDisplay b {
             font-weight: 700;
             color: #9370DB; /* MediumPurple */
+        }
+        body.dark-mode #adviceDisplay strong, body.dark-mode #adviceDisplay b {
+            color: #a78bfa; /* Lighter purple for dark mode */
         }
         #adviceDisplay em, #adviceDisplay i {
             font-style: italic;
             color: #DA70D6; /* Orchid */
         }
+        body.dark-mode #adviceDisplay em, body.dark-mode #adviceDisplay i {
+            color: #b785d1; /* Lighter orchid for dark mode */
+        }
         #adviceDisplay del { /* Strikethrough style */
             text-decoration: line-through;
             color: #888;
+        }
+        body.dark-mode #adviceDisplay del {
+            color: #95a5a6;
         }
         #adviceDisplay blockquote {
             border-left: none; /* Remove standard blockquote border */
@@ -183,12 +274,18 @@
             font-style: italic;
             position: relative;
         }
+        body.dark-mode #adviceDisplay blockquote {
+            color: #bdc3c7;
+        }
         #adviceDisplay blockquote::before {
             content: '| '; /* Add WhatsApp quote pipe */
             color: #DA70D6; /* Orchid */
             font-weight: bold;
             position: absolute;
             left: 0;
+        }
+        body.dark-mode #adviceDisplay blockquote::before {
+            color: #b785d1;
         }
         #adviceDisplay ul {
             list-style: none; /* Remove default bullets */
@@ -201,12 +298,18 @@
             color: #555;
             padding-left: 1.2em; /* Space for custom bullet */
         }
+        body.dark-mode #adviceDisplay ul li {
+            color: #bdc3c7;
+        }
         #adviceDisplay ul li::before {
             content: '* '; /* Use asterisk as bullet, as per WhatsApp style */
             color: #9370DB; /* MediumPurple */
             font-weight: bold;
             position: absolute;
             left: 0;
+        }
+        body.dark-mode #adviceDisplay ul li::before {
+            color: #a78bfa;
         }
 
         /* Loading indicator animation */
@@ -215,6 +318,9 @@
             color: #9370DB;
             animation: pulse 1.5s infinite ease-in-out;
             text-align: center;
+        }
+        body.dark-mode #adviceDisplay .loading-indicator {
+            color: #a78bfa;
         }
 
         @keyframes pulse {
@@ -232,6 +338,9 @@
             overflow: hidden;
             position: relative;
         }
+        body.dark-mode .skeleton-loader {
+            background-color: #5e7992;
+        }
 
         .skeleton-loader::before {
             content: '';
@@ -243,6 +352,9 @@
             width: 50%;
             background: linear-gradient(to right, transparent 0%, #f0f0f0 50%, transparent 100%);
             animation: shimmer 1.5s infinite;
+        }
+        body.dark-mode .skeleton-loader::before {
+            background: linear-gradient(to right, transparent 0%, rgba(255,255,255,0.1) 50%, transparent 100%);
         }
 
         @keyframes shimmer {
@@ -260,6 +372,9 @@
             background-color: #c0c0c0;
             border-radius: 3px;
         }
+        body.dark-mode .skeleton-line {
+            background-color: #6d869f;
+        }
         .skeleton-line.short {
             width: 60%;
         }
@@ -276,6 +391,9 @@
             color: #666;
             font-weight: 500;
         }
+        body.dark-mode #generationLimitDisplay {
+            color: #bdc3c7;
+        }
 
         .error-message {
             color: #D64545; /* A reddish color for errors */
@@ -287,11 +405,276 @@
             border-radius: 5px;
             margin-top: 20px;
         }
+        body.dark-mode .error-message {
+            background-color: #7f3434;
+            border-color: #ff6b6b;
+            color: #ffe0e0;
+        }
+
+        /* Cookie Consent Banner */
+        #cookieConsentBanner {
+            position: fixed;
+            bottom: 0;
+            left: 0;
+            width: 100%;
+            background-color: #333;
+            color: white;
+            padding: 15px 20px;
+            text-align: center;
+            box-shadow: 0 -2px 10px rgba(0, 0, 0, 0.1);
+            z-index: 1000;
+            display: none; /* Hidden by default */
+            flex-wrap: wrap;
+            justify-content: center;
+            align-items: center;
+            gap: 15px;
+        }
+        #cookieConsentBanner p {
+            margin: 0;
+            flex-grow: 1;
+        }
+        #cookieConsentBanner button {
+            background-color: #7B68EE;
+            color: white;
+            border: none;
+            padding: 8px 15px;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 0.9em;
+            transition: background-color 0.3s ease;
+        }
+        #cookieConsentBanner button:hover {
+            background-color: #5d48c8;
+        }
+
+        /* History and Favorites Sections */
+        .history-section, .favorites-section {
+            margin-top: 40px;
+            text-align: left;
+            background-color: #f9f9f9;
+            border-radius: 10px;
+            padding: 25px;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.05);
+            transition: background-color 0.3s ease;
+        }
+        body.dark-mode .history-section, body.dark-mode .favorites-section {
+            background-color: #3b5066;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.15);
+        }
+
+        .history-section h2, .favorites-section h2 {
+            color: #7B68EE;
+            margin-bottom: 20px;
+            font-size: 1.6em;
+            font-weight: 600;
+        }
+        body.dark-mode .history-section h2, body.dark-mode .favorites-section h2 {
+            color: #a78bfa;
+        }
+
+        .advice-list {
+            list-style: none;
+            padding: 0;
+            margin: 0;
+        }
+
+        .advice-list li {
+            background-color: #eef;
+            border-left: 3px solid #9370DB;
+            padding: 15px;
+            margin-bottom: 10px;
+            border-radius: 8px;
+            font-size: 0.95em;
+            line-height: 1.5;
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+            word-wrap: break-word; /* Ensure long words break */
+            transition: background-color 0.3s ease;
+        }
+        body.dark-mode .advice-list li {
+            background-color: #5e7992;
+            border-left-color: #a78bfa;
+            color: #ecf0f1;
+        }
+
+        .advice-list li:last-child {
+            margin-bottom: 0;
+        }
+
+        .advice-list .advice-content {
+            flex-grow: 1;
+        }
+        .advice-list .advice-actions {
+            display: flex;
+            gap: 8px;
+            justify-content: flex-end;
+            flex-wrap: wrap; /* Allow buttons to wrap */
+        }
+        .advice-list .advice-actions button {
+            padding: 5px 10px;
+            font-size: 0.8em;
+            border-radius: 20px;
+            background-color: #DA70D6;
+            color: white;
+            border: none;
+            cursor: pointer;
+            transition: background-color 0.2s ease;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+        }
+        .advice-list .advice-actions button:hover {
+            background-color: #C71585;
+        }
+        body.dark-mode .advice-list .advice-actions button {
+            background-color: #b785d1;
+        }
+        body.dark-mode .advice-list .advice-actions button:hover {
+            background-color: #9b5cc1;
+        }
+
+        /* Theme Toggle Button */
+        #themeToggleButton {
+            position: absolute;
+            top: 20px;
+            right: 20px;
+            padding: 10px 15px;
+            font-size: 0.9em;
+            background-color: #9370DB; /* MediumPurple */
+            color: white;
+            border: none;
+            border-radius: 25px;
+            cursor: pointer;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+            transition: background-color 0.3s ease, transform 0.2s ease;
+            display: flex;
+            align-items: center;
+            gap: 5px;
+        }
+        #themeToggleButton:hover {
+            background-color: #8A2BE2;
+            transform: translateY(-2px);
+        }
+        body.dark-mode #themeToggleButton {
+            background-color: #a78bfa;
+            color: #333;
+        }
+        body.dark-mode #themeToggleButton:hover {
+            background-color: #8b5cf6;
+        }
+
+        /* Message Box styling */
+        .message-box-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.6);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            z-index: 1001;
+            opacity: 0;
+            visibility: hidden;
+            transition: opacity 0.3s ease, visibility 0.3s ease;
+        }
+        .message-box-overlay.show {
+            opacity: 1;
+            visibility: visible;
+        }
+        .message-box {
+            background-color: #fff;
+            padding: 30px;
+            border-radius: 10px;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3);
+            max-width: 400px;
+            width: 90%;
+            text-align: center;
+            transform: translateY(-20px);
+            opacity: 0;
+            transition: transform 0.3s ease, opacity 0.3s ease;
+        }
+        .message-box-overlay.show .message-box {
+            transform: translateY(0);
+            opacity: 1;
+        }
+        body.dark-mode .message-box {
+            background-color: #3b5066;
+            color: #ecf0f1;
+        }
+        .message-box h3 {
+            color: #7B68EE;
+            margin-top: 0;
+            margin-bottom: 15px;
+        }
+        body.dark-mode .message-box h3 {
+            color: #a78bfa;
+        }
+        .message-box p {
+            margin-bottom: 20px;
+        }
+        .message-box button {
+            background-color: #9370DB;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 5px;
+            cursor: pointer;
+            transition: background-color 0.3s ease;
+        }
+        .message-box button:hover {
+            background-color: #8A2BE2;
+        }
+        body.dark-mode .message-box button {
+            background-color: #a78bfa;
+        }
+        body.dark-mode .message-box button:hover {
+            background-color: #8b5cf6;
+        }
+
+        /* Responsive adjustments */
+        @media (max-width: 600px) {
+            .container {
+                padding: 20px;
+            }
+            h1 {
+                font-size: 1.8em;
+            }
+            .button-group {
+                flex-direction: column;
+                gap: 10px;
+            }
+            .advice-button, .copy-button {
+                width: 100%;
+                padding: 12px 20px;
+                font-size: 1em;
+            }
+            .fav-button, .share-button {
+                width: auto; /* Adjust for wrap */
+            }
+            #themeToggleButton {
+                top: 10px;
+                right: 10px;
+                padding: 8px 12px;
+                font-size: 0.8em;
+            }
+            #cookieConsentBanner {
+                flex-direction: column;
+                gap: 10px;
+            }
+            #cookieConsentBanner p {
+                text-align: center;
+            }
+        }
     </style>
 </head>
 <body>
 
     <div class="container">
+        <button id="themeToggleButton">
+            <i class="fas fa-moon"></i> Tryb Ciemny
+        </button>
+
         <h1>Generator Porad dla Cleangirls ✨</h1>
         <div class="input-group">
             <label for="customTopicInput">Wpisz swój temat (opcjonalnie):</label>
@@ -306,15 +689,66 @@
             <!-- Initial message/loading indicator -->
             <p class="loading-indicator">Wpisz temat i kliknij "Wygeneruj nową poradę!", aby rozpocząć!</p>
         </div>
+        <div id="adviceActions" style="display: none; margin-top: 15px; justify-content: center; gap: 10px; flex-wrap: wrap;">
+            <button class="fav-button" onclick="addCurrentAdviceToFavorites()"><i class="fas fa-heart"></i> Dodaj do ulubionych</button>
+            <button class="share-button" onclick="shareAdvice('whatsapp')"><i class="fab fa-whatsapp"></i> Udostępnij na WhatsApp</button>
+            <button class="share-button" onclick="shareAdvice('web')"><i class="fas fa-share-alt"></i> Udostępnij</button>
+        </div>
+
+        <div class="history-section">
+            <h2><i class="fas fa-history"></i> Historia Porad</h2>
+            <ul id="adviceHistoryList" class="advice-list">
+                <!-- Advice history will be loaded here -->
+                <p style="color: #888;">Brak historii porad.</p>
+            </ul>
+        </div>
+
+        <div class="favorites-section">
+            <h2><i class="fas fa-star"></i> Ulubione Porady</h2>
+            <ul id="favoriteAdviceList" class="advice-list">
+                <!-- Favorite advice will be loaded here -->
+                <p style="color: #888;">Brak ulubionych porad.</p>
+            </ul>
+        </div>
     </div>
 
+    <!-- Cookie Consent Banner -->
+    <div id="cookieConsentBanner">
+        <p>Ta strona używa ciasteczek, aby zarządzać limitem generowania porad. Kontynuując, wyrażasz na to zgodę.</p>
+        <button onclick="acceptCookies()">Rozumiem</button>
+    </div>
+
+    <!-- Custom Message Box -->
+    <div id="messageBoxOverlay" class="message-box-overlay">
+        <div class="message-box">
+            <h3 id="messageBoxTitle"></h3>
+            <p id="messageBoxContent"></p>
+            <button onclick="closeMessageBox()">OK</button>
+        </div>
+    </div>
+
+    <!-- Marked.js library for Markdown to HTML conversion -->
+    <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
     <script>
         let lastGeneratedRawContent = ""; // Global variable to store the raw, formatted content from AI for copying
         let streamingInterval = null; // To hold the interval for text streaming
+        let soundEffectsEnabled = true; // State for sound effects
+        let vibrationEnabled = true; // State for vibration
 
         const MAX_DAILY_GENERATIONS = 10;
         const COOKIE_NAME_COUNT = 'cleangirlAdviceCount';
         const COOKIE_NAME_DATE = 'cleangirlAdviceDate';
+        const COOKIE_CONSENT_NAME = 'cleangirlCookieConsent';
+        const LOCAL_STORAGE_HISTORY_KEY = 'cleangirlAdviceHistory';
+        const LOCAL_STORAGE_FAVORITES_KEY = 'cleangirlFavoriteAdvice';
+        const LOCAL_STORAGE_THEME_KEY = 'cleangirlTheme';
+        const LOCAL_STORAGE_SOUND_KEY = 'cleangirlSoundEnabled';
+        const LOCAL_STORAGE_VIBRATION_KEY = 'cleangirlVibrationEnabled';
+
+        // Sound effects
+        const generateSound = new Audio('https://www.soundjay.com/buttons/beep-07.mp3'); // Example sound, replace if needed
+        const copySound = new Audio('https://www.soundjay.com/buttons/button-1.mp3'); // Example sound, replace if needed
+        const errorSound = new Audio('https://www.soundjay.com/misc/fail-buzzer-02.mp3'); // Example sound
 
         // Default categories for advice if no custom topic is provided
         const defaultAdviceCategories = [
@@ -322,6 +756,8 @@
             "finanse", "zdrowie", "relacje", "produktywność", "rozwój osobisty",
             "chomiki", "koty", "psy", "modne ubrania", "zdrowe jedzenie", "podróże", "kwiaty", "książki"
         ];
+
+        // --- Utility Functions for Cookies and LocalStorage ---
 
         /**
          * Sets a cookie with a given name, value, and expiration in days.
@@ -359,15 +795,6 @@
         }
 
         /**
-         * Deletes a cookie by its name.
-         * @param {string} name - The name of the cookie to delete.
-         */
-        function deleteCookie(name) {
-            document.cookie = name + '=; Max-Age=-99999999; path=/';
-            console.log(`[deleteCookie] Cookie '${name}' deleted.`);
-        }
-
-        /**
          * Gets today's date in YYYY-MM-DD format.
          * @returns {string} - Current date string.
          */
@@ -378,6 +805,82 @@
             const day = String(today.getDate()).padStart(2, '0');
             return `${year}-${month}-${day}`;
         }
+
+        /**
+         * Saves data to localStorage.
+         * @param {string} key - The key for localStorage.
+         * @param {Array} data - The array of data to save.
+         */
+        function saveToLocalStorage(key, data) {
+            try {
+                localStorage.setItem(key, JSON.stringify(data));
+                console.log(`[LocalStorage] Data saved to ${key}`);
+            } catch (e) {
+                console.error(`[LocalStorage] Error saving data to ${key}:`, e);
+            }
+        }
+
+        /**
+         * Loads data from localStorage.
+         * @param {string} key - The key for localStorage.
+         * @returns {Array} - The parsed array of data or an empty array.
+         */
+        function loadFromLocalStorage(key) {
+            try {
+                const data = localStorage.getItem(key);
+                return data ? JSON.parse(data) : [];
+            } catch (e) {
+                console.error(`[LocalStorage] Error loading data from ${key}:`, e);
+                return [];
+            }
+        }
+
+        // --- Cookie Consent Logic ---
+
+        /**
+         * Checks if cookie consent has been given.
+         * @returns {boolean}
+         */
+        function hasCookieConsent() {
+            return getCookie(COOKIE_CONSENT_NAME) === 'true';
+        }
+
+        /**
+         * Accepts cookies and hides the banner.
+         */
+        function acceptCookies() {
+            setCookie(COOKIE_CONSENT_NAME, 'true', 365); // Consent for 1 year
+            document.getElementById('cookieConsentBanner').style.display = 'none';
+        }
+
+        /**
+         * Displays the cookie consent banner if consent not given.
+         */
+        function showCookieConsentBanner() {
+            if (!hasCookieConsent()) {
+                document.getElementById('cookieConsentBanner').style.display = 'flex';
+            }
+        }
+
+        // --- Custom Message Box ---
+        function showMessageBox(title, content) {
+            document.getElementById('messageBoxTitle').textContent = title;
+            document.getElementById('messageBoxContent').textContent = content;
+            document.getElementById('messageBoxOverlay').classList.add('show');
+            if (vibrationEnabled) {
+                navigator.vibrate(200); // Short vibrate for alert
+            }
+            if (soundEffectsEnabled) {
+                errorSound.play(); // Play error sound for API issues/limits
+            }
+        }
+
+        function closeMessageBox() {
+            document.getElementById('messageBoxOverlay').classList.remove('show');
+        }
+
+
+        // --- UI Update Functions ---
 
         /**
          * Updates the display showing remaining generations.
@@ -416,133 +919,9 @@
             }
         }
 
-        // Initialize the limit display on page load
-        document.addEventListener('DOMContentLoaded', updateGenerationLimitDisplay);
-
-
-        /**
-         * Converts markdown text (WhatsApp style) to HTML.
-         * @param {string} markdownText - The text with WhatsApp-style markdown.
-         * @returns {string} - The HTML formatted string.
-         */
-        function convertMarkdownToHtml(markdownText) {
-            let htmlText = markdownText;
-
-            // IMPORTANT: Order matters here to prevent conflicts with nested formatting or special characters.
-
-            // First, handle code blocks (```text```) to prevent inner formatting from being processed
-            htmlText = htmlText.replace(/```(.*?)```/gs, '<pre><code>$1</code></pre>');
-
-            // Then, handle inline code (`text`)
-            htmlText = htmlText.replace(/`(.*?)`/g, '<code>$1</code>');
-
-            // Now, handle bold (*text*)
-            htmlText = htmlText.replace(/\*(.*?)\*/g, '<strong>$1</strong>');
-
-            // Handle italic (_text_) - ensure it doesn't conflict with bold/code
-            htmlText = htmlText.replace(/_(.*?)_/g, '<em>$1</em>');
-
-            // Handle strikethrough (~text~)
-            htmlText = htmlText.replace(/~(.*?)~/g, '<del>$1</del>');
-
-            // Quote conversion: > text -> <blockquote>text</blockquote>
-            // This needs to be done line by line, so split and join
-            const lines = htmlText.split('\n');
-            let processedLines = lines.map(line => {
-                if (line.startsWith('> ')) {
-                    // Use a div or span inside to maintain line breaks if blockquote adds extra margin
-                    return `<blockquote>${line.substring(2)}</blockquote>`;
-                }
-                return line;
-            });
-            htmlText = processedLines.join('\n');
-
-            // Bulleted list conversion: * text or - text
-            // This regex attempts to find lines starting with * or - and wrap them in <li> within a <ul>
-            // This is a simplified conversion. For more robust list handling, a dedicated markdown parser is better.
-            let outputHtml = '';
-            let inList = false;
-
-            const finalLines = htmlText.split('\n');
-            for (let i = 0; i < finalLines.length; i++) {
-                const line = finalLines[i];
-                const isListItem = line.match(/^(\*|\-)\s.+/);
-
-                if (isListItem) {
-                    if (!inList) {
-                        outputHtml += '<ul>';
-                        inList = true;
-                    }
-                    outputHtml += `<li>${line.substring(isListItem[0].length - line.trimStart().length + 2).trimStart()}</li>`; // Extract content after bullet and space
-                } else {
-                    if (inList) {
-                        outputHtml += '</ul>';
-                        inList = false;
-                    }
-                    outputHtml += line + '\n'; // Add the line back
-                }
-            }
-            if (inList) { // Close any open list at the end
-                outputHtml += '</ul>';
-            }
-            htmlText = outputHtml;
-
-            return htmlText;
-        }
-
-        /**
-         * Simulates a typing/streaming effect for the given HTML content.
-         * @param {HTMLElement} element - The DOM element to stream content into.
-         * @param {string} htmlContent - The full HTML content to be streamed.
-         */
-        function streamTextContent(element, htmlContent) {
-            // Clear any previous streaming interval
-            if (streamingInterval) {
-                clearInterval(streamingInterval);
-                streamingInterval = null;
-            }
-
-            const words = htmlContent.split(/(\s+)/); // Split by word, keeping spaces as separate elements
-            let currentIndex = 0;
-            element.innerHTML = ''; // Clear the display area
-
-            streamingInterval = setInterval(() => {
-                if (currentIndex < words.length) {
-                    // Append words, handling HTML tags carefully
-                    const currentWord = words[currentIndex];
-
-                    // Check if the current word starts an HTML tag or is part of one
-                    if (currentWord.startsWith('<') && !currentWord.includes('>')) {
-                        // This might be the start of a tag, or a partial tag. Find its end.
-                        let fullTag = currentWord;
-                        let tempIndex = currentIndex + 1;
-                        while (tempIndex < words.length && !words[tempIndex].includes('>')) {
-                            fullTag += words[tempIndex];
-                            tempIndex++;
-                        }
-                        if (tempIndex < words.length) { // Found the closing >
-                            fullTag += words[tempIndex];
-                        }
-                        element.innerHTML += fullTag;
-                        currentIndex = tempIndex + 1;
-                    } else {
-                        element.innerHTML += currentWord;
-                        currentIndex++;
-                    }
-
-                    // Scroll to bottom if content overflows
-                    element.scrollTop = element.scrollHeight;
-                } else {
-                    clearInterval(streamingInterval);
-                    streamingInterval = null;
-                }
-            }, 30); // Adjust typing speed here (miliseconds per word/part)
-        }
-
-
         /**
          * Displays the skeleton loading state in the adviceDisplay area.
-         * This now only includes lines of text.
+         * Includes an informative message for the user.
          */
         function showLoadingState() {
             // Clear any ongoing streaming
@@ -555,6 +934,7 @@
             adviceDisplay.classList.remove('show');
             adviceDisplay.innerHTML = `
                 <div class="skeleton-loader">
+                    <p class="loading-indicator">Generuję nową poradę, bądź cierpliwa! 🌸</p>
                     <div class="skeleton-line long"></div>
                     <div class="skeleton-line medium"></div>
                     <div class="skeleton-line short"></div>
@@ -564,7 +944,241 @@
                 </div>
             `;
             adviceDisplay.classList.add('show');
+            document.getElementById('adviceActions').style.display = 'none'; // Hide action buttons during loading
         }
+
+        /**
+         * Simulates a typing/streaming effect for the given HTML content.
+         * @param {HTMLElement} element - The DOM element to stream content into.
+         * @param {string} htmlContent - The full HTML content to be streamed.
+         * @param {Function} [callback] - Optional callback to run after streaming is complete.
+         */
+        function streamTextContent(element, htmlContent, callback = () => {}) {
+            // Clear any previous streaming interval
+            if (streamingInterval) {
+                clearInterval(streamingInterval);
+                streamingInterval = null;
+            }
+
+            const words = htmlContent.split(/(\s+)/); // Split by word, keeping spaces as separate elements
+            let currentIndex = 0;
+            element.innerHTML = ''; // Clear the display area
+
+            streamingInterval = setInterval(() => {
+                if (currentIndex < words.length) {
+                    const currentWord = words[currentIndex];
+                    // Append words, handling HTML tags carefully
+                    // This logic assumes HTML tags are well-formed (e.g., <tag>content</tag>) and splits
+                    // on spaces. For more robust HTML handling during streaming, one might need a more complex parser.
+                    // For now, directly appending might break partial tags if a space falls within one.
+                    // A simple heuristic: if a word starts with '<' and doesn't contain '>', it's likely part of a tag.
+                    let appendedText = currentWord;
+                    let nextIndex = currentIndex + 1;
+                    while (appendedText.startsWith('<') && !appendedText.includes('>') && nextIndex < words.length) {
+                        appendedText += words[nextIndex];
+                        nextIndex++;
+                    }
+                    element.innerHTML += appendedText;
+                    currentIndex = nextIndex;
+
+                    // Scroll to bottom if content overflows
+                    element.scrollTop = element.scrollHeight;
+                } else {
+                    clearInterval(streamingInterval);
+                    streamingInterval = null;
+                    callback(); // Run callback after streaming completes
+                }
+            }, 30); // Adjust typing speed here (miliseconds per word/part)
+        }
+
+
+        // --- History and Favorites Logic ---
+
+        /**
+         * Adds an advice to the history. Stores only the raw content.
+         * Limits history to the last 5 entries.
+         * @param {string} adviceRawContent - The raw markdown content of the advice.
+         */
+        function saveAdviceToHistory(adviceRawContent) {
+            let history = loadFromLocalStorage(LOCAL_STORAGE_HISTORY_KEY);
+            // Add only if not already the most recent advice
+            if (history.length === 0 || history[0] !== adviceRawContent) {
+                history.unshift(adviceRawContent); // Add to the beginning
+                if (history.length > 5) { // Keep only the last 5
+                    history = history.slice(0, 5);
+                }
+                saveToLocalStorage(LOCAL_STORAGE_HISTORY_KEY, history);
+                renderAdviceHistory();
+            }
+        }
+
+        /**
+         * Adds the currently displayed advice to favorites.
+         */
+        function addCurrentAdviceToFavorites() {
+            if (!lastGeneratedRawContent) {
+                showMessageBox("Błąd", "Nie ma porady do dodania do ulubionych.");
+                return;
+            }
+            let favorites = loadFromLocalStorage(LOCAL_STORAGE_FAVORITES_KEY);
+            if (!favorites.includes(lastGeneratedRawContent)) {
+                favorites.unshift(lastGeneratedRawContent); // Add to the beginning
+                saveToLocalStorage(LOCAL_STORAGE_FAVORITES_KEY, favorites);
+                renderFavoriteAdvice();
+                showMessageBox("Sukces!", "Porada została dodana do ulubionych. ❤️");
+            } else {
+                showMessageBox("Informacja", "Ta porada jest już w Twoich ulubionych.");
+            }
+        }
+
+        /**
+         * Removes an advice from favorites.
+         * @param {string} adviceToRemove - The raw content of the advice to remove.
+         */
+        function removeAdviceFromFavorites(adviceToRemove) {
+            let favorites = loadFromLocalStorage(LOCAL_STORAGE_FAVORITES_KEY);
+            const updatedFavorites = favorites.filter(advice => advice !== adviceToRemove);
+            saveToLocalStorage(LOCAL_STORAGE_FAVORITES_KEY, updatedFavorites);
+            renderFavoriteAdvice();
+            showMessageBox("Usunięto", "Porada została usunięta z ulubionych.");
+        }
+
+        /**
+         * Renders the advice history list.
+         */
+        function renderAdviceHistory() {
+            const historyList = document.getElementById('adviceHistoryList');
+            const history = loadFromLocalStorage(LOCAL_STORAGE_HISTORY_KEY);
+            historyList.innerHTML = ''; // Clear current list
+
+            if (history.length === 0) {
+                historyList.innerHTML = '<p style="color: #888;">Brak historii porad.</p>';
+                return;
+            }
+
+            history.forEach(rawContent => {
+                const li = document.createElement('li');
+                const contentDiv = document.createElement('div');
+                contentDiv.classList.add('advice-content');
+                // Use marked.parse for history display as well
+                contentDiv.innerHTML = marked.parse(rawContent);
+
+                const actionsDiv = document.createElement('div');
+                actionsDiv.classList.add('advice-actions');
+
+                const copyBtn = document.createElement('button');
+                copyBtn.innerHTML = '<i class="far fa-copy"></i> Kopiuj';
+                copyBtn.onclick = () => copyTextToClipboard(rawContent, copyBtn);
+
+                const favBtn = document.createElement('button');
+                favBtn.innerHTML = '<i class="fas fa-heart"></i> Dodaj do ulubionych';
+                favBtn.onclick = () => {
+                    addCurrentAdviceToFavoritesFromHistory(rawContent);
+                };
+
+                actionsDiv.appendChild(copyBtn);
+                actionsDiv.appendChild(favBtn);
+
+                li.appendChild(contentDiv);
+                li.appendChild(actionsDiv);
+                historyList.appendChild(li);
+            });
+        }
+
+        /**
+         * Helper to add a historical advice to favorites.
+         * @param {string} rawContent - The raw content to add.
+         */
+        function addCurrentAdviceToFavoritesFromHistory(rawContent) {
+            let favorites = loadFromLocalStorage(LOCAL_STORAGE_FAVORITES_KEY);
+            if (!favorites.includes(rawContent)) {
+                favorites.unshift(rawContent);
+                saveToLocalStorage(LOCAL_STORAGE_FAVORITES_KEY, favorites);
+                renderFavoriteAdvice();
+                showMessageBox("Sukces!", "Porada z historii została dodana do ulubionych. ❤️");
+            } else {
+                showMessageBox("Informacja", "Ta porada jest już w Twoich ulubionych.");
+            }
+        }
+
+        /**
+         * Renders the favorite advice list.
+         */
+        function renderFavoriteAdvice() {
+            const favoritesList = document.getElementById('favoriteAdviceList');
+            const favorites = loadFromLocalStorage(LOCAL_STORAGE_FAVORITES_KEY);
+            favoritesList.innerHTML = ''; // Clear current list
+
+            if (favorites.length === 0) {
+                favoritesList.innerHTML = '<p style="color: #888;">Brak ulubionych porad.</p>';
+                return;
+            }
+
+            favorites.forEach(rawContent => {
+                const li = document.createElement('li');
+                const contentDiv = document.createElement('div');
+                contentDiv.classList.add('advice-content');
+                contentDiv.innerHTML = marked.parse(rawContent);
+
+                const actionsDiv = document.createElement('div');
+                actionsDiv.classList.add('advice-actions');
+
+                const copyBtn = document.createElement('button');
+                copyBtn.innerHTML = '<i class="far fa-copy"></i> Kopiuj';
+                copyBtn.onclick = () => copyTextToClipboard(rawContent, copyBtn);
+
+                const removeBtn = document.createElement('button');
+                removeBtn.innerHTML = '<i class="fas fa-trash-alt"></i> Usuń';
+                removeBtn.onclick = () => removeAdviceFromFavorites(rawContent);
+
+                actionsDiv.appendChild(copyBtn);
+                actionsDiv.appendChild(removeBtn);
+
+                li.appendChild(contentDiv);
+                li.appendChild(actionsDiv);
+                favoritesList.appendChild(li);
+            });
+        }
+
+
+        // --- Share Functions ---
+
+        /**
+         * Shares the generated advice to various platforms.
+         * @param {string} platform - 'whatsapp' or 'web' (for Web Share API).
+         */
+        function shareAdvice(platform) {
+            if (!lastGeneratedRawContent) {
+                showMessageBox("Błąd", "Brak porady do udostępnienia.");
+                return;
+            }
+
+            const textToShare = lastGeneratedRawContent;
+
+            if (platform === 'whatsapp') {
+                const whatsappUrl = `whatsapp://send?text=${encodeURIComponent(textToShare)}`;
+                window.open(whatsappUrl, '_blank');
+            } else if (platform === 'web') {
+                if (navigator.share) {
+                    navigator.share({
+                        title: 'Porada Cleangirl',
+                        text: textToShare,
+                    })
+                    .then(() => console.log('Udostępniono pomyślnie'))
+                    .catch((error) => console.error('Błąd udostępniania:', error));
+                } else {
+                    // Fallback for browsers that don't support Web Share API
+                    showMessageBox("Udostępnianie", "Twoja przeglądarka nie wspiera funkcji udostępniania. Skopiuj tekst ręcznie i wklej.");
+                    copyTextToClipboard(textToShare); // Copy to clipboard as fallback
+                }
+            }
+
+            if (vibrationEnabled) {
+                navigator.vibrate(100); // Short vibrate for sharing
+            }
+        }
+
+        // --- Core Generation Logic ---
 
         /**
          * Generates a new piece of advice based on a custom topic or a random default category.
@@ -592,12 +1206,10 @@
 
             if (generationCount >= MAX_DAILY_GENERATIONS) {
                 console.log(`[generateAdvice ABORT] Daily limit reached: ${generationCount}/${MAX_DAILY_GENERATIONS}`);
-                const adviceDisplay = document.getElementById('adviceDisplay');
-                adviceDisplay.innerHTML = `<div class="error-message">
-                    Osiągnięto dzienny limit (${MAX_DAILY_GENERATIONS}) generowania porad.
-                    Spróbuj ponownie jutro! ✨
-                </div>`;
-                adviceDisplay.classList.add('show');
+                showMessageBox(
+                    "Dzienny Limit Osiągnięty",
+                    `Osiągnięto dzienny limit (${MAX_DAILY_GENERATIONS}) generowania porad. Spróbuj ponownie jutro! ✨`
+                );
                 updateGenerationLimitDisplay(); // Ensure display reflects the limit
                 return; // Stop execution
             }
@@ -705,7 +1317,7 @@
             > Ja średnio ostatnio nie umiem się wysypać [hah] 🤭
 
             > Śniadanko dla was girls🤘🏻!
-            > \`\`\`🥞🥗�🧇\`\`\`
+            > \`\`\`🥞🥗🍵🧇\`\`\`
 
             > Macie jakieś plany 🥂?
             > Ja mam w planach naukę na jutrzejszy sprawdzian z matmy 😵‍💫🥹!
@@ -815,7 +1427,7 @@
                 });
 
                 if (!geminiResponse.ok) {
-                    // Jeśli API zwróci błąd HTTP (np. 403), rzuć wyjątek
+                    // If API returns an HTTP error (e.g., 403), throw an exception
                     throw new Error(`Błąd HTTP z API Gemini! status: ${geminiResponse.status}`);
                 }
 
@@ -824,33 +1436,35 @@
                     geminiResult.candidates[0].content && geminiResult.candidates[0].content.parts &&
                     geminiResult.candidates[0].content.parts.length > 0) {
                     aiGeneratedRawContent = geminiResult.candidates[0].content.parts[0].text;
-                    lastGeneratedRawContent = aiGeneratedRawContent; // Przechowaj surową zawartość do kopiowania
+                    lastGeneratedRawContent = aiGeneratedRawContent; // Store raw content for copying
 
-                    // Licznik został już zwiększony na początku funkcji, więc tutaj nic nie zmieniamy,
-                    // ponieważ generacja zakończyła się sukcesem.
+                    // Counter was already incremented at the start of the function, so no change here
                     console.log(`[generateAdvice SUCCESS] Porada wygenerowana pomyślnie. Obecny licznik: ${generationCount}`);
 
-                    // Konwertuj markdown na HTML przed strumieniowaniem
-                    const aiGeneratedHtmlContent = convertMarkdownToHtml(aiGeneratedRawContent);
+                    // Save to history after successful generation
+                    saveAdviceToHistory(aiGeneratedRawContent);
+
+                    // Convert markdown to HTML before streaming
+                    // Using marked.js here
+                    const aiGeneratedHtmlContent = marked.parse(aiGeneratedRawContent);
 
                     const adviceDisplay = document.getElementById('adviceDisplay');
-                    adviceDisplay.innerHTML = ''; // Wyczyść wyświetlanie
-
-                    // Utwórz span do przechowywania strumieniowanego tekstu
-                    const textContainer = document.createElement('span');
-                    adviceDisplay.appendChild(textContainer);
-
-                    // Rozpocznij strumieniowanie tekstu
-                    streamTextContent(textContainer, aiGeneratedHtmlContent);
+                    // Start text streaming, and then show action buttons
+                    streamTextContent(adviceDisplay, aiGeneratedHtmlContent, () => {
+                        document.getElementById('adviceActions').style.display = 'flex';
+                        if (soundEffectsEnabled) generateSound.play();
+                        if (vibrationEnabled) navigator.vibrate(50); // Small vibrate
+                    });
 
                 } else {
-                    // Wywołanie API było OK, ale struktura odpowiedzi jest nieoczekiwana lub brakuje zawartości
+                    // API call was OK, but response structure is unexpected or content is missing
                     console.error("Nieoczekiwana struktura lub brak zawartości z API Gemini:", geminiResult);
-                    const adviceDisplay = document.getElementById('adviceDisplay');
-                    adviceDisplay.innerHTML = `<div class="error-message">Wystąpił problem z wygenerowaniem porady tekstowej (niepoprawna odpowiedź API). Spróbuj ponownie.</div>`;
-                    adviceDisplay.classList.add('show');
+                    showMessageBox(
+                        "Błąd Generowania",
+                        "Wystąpił problem z wygenerowaniem porady tekstowej (niepoprawna odpowiedź API). Spróbuj ponownie."
+                    );
 
-                    // Cofnij zwiększenie licznika, ponieważ generacja nie powiodła się
+                    // Revert counter increment because generation failed
                     generationCount--;
                     setCookie(COOKIE_NAME_COUNT, generationCount, 1);
                     updateGenerationLimitDisplay();
@@ -858,48 +1472,120 @@
                 }
 
             } catch (error) {
-                // Błąd sieci, błąd 403, itp.
+                // Network error, 403 error, etc.
                 console.error("Błąd wywołania API Gemini:", error);
-                const adviceDisplay = document.getElementById('adviceDisplay');
-                adviceDisplay.innerHTML = `<div class="error-message">Błąd połączenia z API Gemini: ${error.message}. Spróbuj ponownie.</div>`;
-                adviceDisplay.classList.add('show');
+                showMessageBox(
+                    "Błąd Połączenia",
+                    `Błąd połączenia z API Gemini: ${error.message}. Spróbuj ponownie.`
+                );
 
-                // Cofnij zwiększenie licznika, ponieważ wywołanie API nie powiodło się
+                // Revert counter increment because API call failed
                 generationCount--;
                 setCookie(COOKIE_NAME_COUNT, generationCount, 1);
                 updateGenerationLimitDisplay();
                 console.log(`[generateAdvice ERROR - API Call Failed] Cofnięto licznik do: ${generationCount} z powodu błędu API.`);
             }
 
-            customTopicInput.value = ''; // Wyczyść pole własnego tematu
+            customTopicInput.value = ''; // Clear custom topic input field
         }
 
         /**
          * Copies the last generated raw advice content to the clipboard.
          * Provides visual confirmation to the user upon successful copy.
+         * @param {string} [textToCopy] - Optional text to copy, defaults to last generated.
+         * @param {HTMLElement} [buttonElement] - Optional button element to update text on.
          */
-        function copyAdvice() {
-            if (!lastGeneratedRawContent) {
-                const adviceDisplay = document.getElementById('adviceDisplay');
-                adviceDisplay.innerHTML = '<p class="loading-indicator">Brak porady do skopiowania. Wygeneruj ją najpierw!</p>';
-                adviceDisplay.classList.add('show');
+        function copyAdvice(textToCopy = lastGeneratedRawContent, buttonElement = document.querySelector('.copy-button')) {
+            if (!textToCopy) {
+                showMessageBox("Błąd", "Brak porady do skopiowania. Wygeneruj ją najpierw!");
                 return;
             }
 
             const tempTextArea = document.createElement('textarea');
-            tempTextArea.value = lastGeneratedRawContent;
+            tempTextArea.value = textToCopy;
             document.body.appendChild(tempTextArea);
             tempTextArea.select();
             document.execCommand('copy');
             document.body.removeChild(tempTextArea);
 
-            const copyButton = document.querySelector('.copy-button');
-            const originalText = copyButton.textContent;
-            copyButton.textContent = 'Skopiowano! ✅';
+            const originalText = buttonElement.textContent;
+            buttonElement.textContent = 'Skopiowano! ✅';
             setTimeout(() => {
-                copyButton.textContent = originalText;
+                buttonElement.textContent = originalText;
             }, 2000);
+
+            if (soundEffectsEnabled) copySound.play();
+            if (vibrationEnabled) navigator.vibrate(30); // Very short vibrate
         }
+
+        // Helper for history/favorites copy
+        function copyTextToClipboard(text, button) {
+            copyAdvice(text, button);
+        }
+
+        // --- Theme Toggle Logic ---
+        const themeToggleButton = document.getElementById('themeToggleButton');
+
+        /**
+         * Loads the saved theme preference from localStorage.
+         */
+        function loadThemePreference() {
+            const savedTheme = localStorage.getItem(LOCAL_STORAGE_THEME_KEY);
+            if (savedTheme === 'dark') {
+                document.body.classList.add('dark-mode');
+                themeToggleButton.innerHTML = '<i class="fas fa-sun"></i> Tryb Jasny';
+            } else {
+                document.body.classList.remove('dark-mode');
+                themeToggleButton.innerHTML = '<i class="fas fa-moon"></i> Tryb Ciemny';
+            }
+        }
+
+        /**
+         * Toggles between light and dark mode.
+         */
+        function toggleTheme() {
+            document.body.classList.toggle('dark-mode');
+            if (document.body.classList.contains('dark-mode')) {
+                localStorage.setItem(LOCAL_STORAGE_THEME_KEY, 'dark');
+                themeToggleButton.innerHTML = '<i class="fas fa-sun"></i> Tryb Jasny';
+            } else {
+                localStorage.setItem(LOCAL_STORAGE_THEME_KEY, 'light');
+                themeToggleButton.innerHTML = '<i class="fas fa-moon"></i> Tryb Ciemny';
+            }
+        }
+
+        themeToggleButton.addEventListener('click', toggleTheme);
+
+        // --- Sound and Vibration Toggles (Not explicitly asked for UI, but included logic) ---
+        // You can add UI buttons for these later if desired.
+        function loadSoundPreference() {
+            const savedSound = localStorage.getItem(LOCAL_STORAGE_SOUND_KEY);
+            if (savedSound === 'false') {
+                soundEffectsEnabled = false;
+            } else {
+                soundEffectsEnabled = true;
+            }
+        }
+
+        function loadVibrationPreference() {
+            const savedVibration = localStorage.getItem(LOCAL_STORAGE_VIBRATION_KEY);
+            if (savedVibration === 'false') {
+                vibrationEnabled = false;
+            } else {
+                vibrationEnabled = true;
+            }
+        }
+
+        // --- Initialisation on Load ---
+        document.addEventListener('DOMContentLoaded', () => {
+            showCookieConsentBanner(); // Check and show cookie banner
+            updateGenerationLimitDisplay(); // Initial display of limit
+            loadThemePreference(); // Load user's theme preference
+            loadSoundPreference(); // Load sound preference
+            loadVibrationPreference(); // Load vibration preference
+            renderAdviceHistory(); // Load and render history
+            renderFavoriteAdvice(); // Load and render favorites
+        });
     </script>
 
 </body>
