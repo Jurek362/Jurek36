@@ -7,7 +7,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <!-- Open Graph meta tags for Discord embed -->
-    <meta property="og:image" content="https://i.postimg.cc/L5BBx6gs/Zrzut-ekranu-2025-06-22-163910-removebg-preview.png">
+    <meta property="og:image" content="https://i.postimg.cc/qB6kzb9g/58d27cbe-c19e-47ff-993b-66529aa77a7e.png">
     <meta property="og:title" content="Generator Porad Cleangirl">
     <meta property="og:description" content="Wygeneruj inspirujące porady w stylu cleangirl na dowolny temat.">
     <meta property="og:type" content="website">
@@ -289,7 +289,7 @@
         }
         #adviceDisplay ul {
             list-style: none; /* Remove default bullets */
-            padding-left: 0; /* Adjust as needed */
+            padding: 0;
             margin: 0;
         }
         #adviceDisplay ul li {
@@ -409,42 +409,6 @@
             background-color: #7f3434;
             border-color: #ff6b6b;
             color: #ffe0e0;
-        }
-
-        /* Cookie Consent Banner */
-        #cookieConsentBanner {
-            position: fixed;
-            bottom: 0;
-            left: 0;
-            width: 100%;
-            background-color: #333;
-            color: white;
-            padding: 15px 20px;
-            text-align: center;
-            box-shadow: 0 -2px 10px rgba(0, 0, 0, 0.1);
-            z-index: 1000;
-            display: none; /* Hidden by default */
-            flex-wrap: wrap;
-            justify-content: center;
-            align-items: center;
-            gap: 15px;
-        }
-        #cookieConsentBanner p {
-            margin: 0;
-            flex-grow: 1;
-        }
-        #cookieConsentBanner button {
-            background-color: #7B68EE;
-            color: white;
-            border: none;
-            padding: 8px 15px;
-            border-radius: 5px;
-            cursor: pointer;
-            font-size: 0.9em;
-            transition: background-color 0.3s ease;
-        }
-        #cookieConsentBanner button:hover {
-            background-color: #5d48c8;
         }
 
         /* History and Favorites Sections */
@@ -658,13 +622,6 @@
                 padding: 8px 12px;
                 font-size: 0.8em;
             }
-            #cookieConsentBanner {
-                flex-direction: column;
-                gap: 10px;
-            }
-            #cookieConsentBanner p {
-                text-align: center;
-            }
         }
     </style>
 </head>
@@ -712,12 +669,6 @@
         </div>
     </div>
 
-    <!-- Cookie Consent Banner -->
-    <div id="cookieConsentBanner">
-        <p>Ta strona używa ciasteczek, aby zarządzać limitem generowania porad. Kontynuując, wyrażasz na to zgodę.</p>
-        <button onclick="acceptCookies()">Rozumiem</button>
-    </div>
-
     <!-- Custom Message Box -->
     <div id="messageBoxOverlay" class="message-box-overlay">
         <div class="message-box">
@@ -731,24 +682,19 @@
     <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
     <script>
         let lastGeneratedRawContent = ""; // Global variable to store the raw, formatted content from AI for copying
-        let streamingInterval = null; // To hold the interval for text streaming
-        let soundEffectsEnabled = true; // State for sound effects
-        let vibrationEnabled = true; // State for vibration
+        // Removed streamingInterval as streaming is removed
+        let vibrationEnabled = true; // State for vibration (sound effects removed, but vibration might still be useful for feedback)
 
-        const MAX_DAILY_GENERATIONS = 10;
-        const COOKIE_NAME_COUNT = 'cleangirlAdviceCount';
-        const COOKIE_NAME_DATE = 'cleangirlAdviceDate';
-        const COOKIE_CONSENT_NAME = 'cleangirlCookieConsent';
+        const MAX_DAILY_GENERATIONS = 10; // Keep for limit version
+        const COOKIE_NAME_COUNT = 'cleangirlAdviceCount'; // Keep for limit version
+        const COOKIE_NAME_DATE = 'cleangirlAdviceDate'; // Keep for limit version
+
         const LOCAL_STORAGE_HISTORY_KEY = 'cleangirlAdviceHistory';
         const LOCAL_STORAGE_FAVORITES_KEY = 'cleangirlFavoriteAdvice';
         const LOCAL_STORAGE_THEME_KEY = 'cleangirlTheme';
-        const LOCAL_STORAGE_SOUND_KEY = 'cleangirlSoundEnabled';
-        const LOCAL_STORAGE_VIBRATION_KEY = 'cleangirlVibrationEnabled';
+        const LOCAL_STORAGE_VIBRATION_KEY = 'cleangirlVibrationEnabled'; // Renamed as sound removed
 
-        // Sound effects
-        const generateSound = new Audio('https://www.soundjay.com/buttons/beep-07.mp3'); // Example sound, replace if needed
-        const copySound = new Audio('https://www.soundjay.com/buttons/button-1.mp3'); // Example sound, replace if needed
-        const errorSound = new Audio('https://www.soundjay.com/misc/fail-buzzer-02.mp3'); // Example sound
+        // Removed sound effects Audio objects
 
         // Default categories for advice if no custom topic is provided
         const defaultAdviceCategories = [
@@ -835,33 +781,6 @@
             }
         }
 
-        // --- Cookie Consent Logic ---
-
-        /**
-         * Checks if cookie consent has been given.
-         * @returns {boolean}
-         */
-        function hasCookieConsent() {
-            return getCookie(COOKIE_CONSENT_NAME) === 'true';
-        }
-
-        /**
-         * Accepts cookies and hides the banner.
-         */
-        function acceptCookies() {
-            setCookie(COOKIE_CONSENT_NAME, 'true', 365); // Consent for 1 year
-            document.getElementById('cookieConsentBanner').style.display = 'none';
-        }
-
-        /**
-         * Displays the cookie consent banner if consent not given.
-         */
-        function showCookieConsentBanner() {
-            if (!hasCookieConsent()) {
-                document.getElementById('cookieConsentBanner').style.display = 'flex';
-            }
-        }
-
         // --- Custom Message Box ---
         function showMessageBox(title, content) {
             document.getElementById('messageBoxTitle').textContent = title;
@@ -870,9 +789,7 @@
             if (vibrationEnabled) {
                 navigator.vibrate(200); // Short vibrate for alert
             }
-            if (soundEffectsEnabled) {
-                errorSound.play(); // Play error sound for API issues/limits
-            }
+            // Removed errorSound.play();
         }
 
         function closeMessageBox() {
@@ -924,12 +841,7 @@
          * Includes an informative message for the user.
          */
         function showLoadingState() {
-            // Clear any ongoing streaming
-            if (streamingInterval) {
-                clearInterval(streamingInterval);
-                streamingInterval = null;
-            }
-
+            // No streaming interval to clear as streaming is removed
             const adviceDisplay = document.getElementById('adviceDisplay');
             adviceDisplay.classList.remove('show');
             adviceDisplay.innerHTML = `
@@ -945,50 +857,6 @@
             `;
             adviceDisplay.classList.add('show');
             document.getElementById('adviceActions').style.display = 'none'; // Hide action buttons during loading
-        }
-
-        /**
-         * Simulates a typing/streaming effect for the given HTML content.
-         * @param {HTMLElement} element - The DOM element to stream content into.
-         * @param {string} htmlContent - The full HTML content to be streamed.
-         * @param {Function} [callback] - Optional callback to run after streaming is complete.
-         */
-        function streamTextContent(element, htmlContent, callback = () => {}) {
-            // Clear any previous streaming interval
-            if (streamingInterval) {
-                clearInterval(streamingInterval);
-                streamingInterval = null;
-            }
-
-            const words = htmlContent.split(/(\s+)/); // Split by word, keeping spaces as separate elements
-            let currentIndex = 0;
-            element.innerHTML = ''; // Clear the display area
-
-            streamingInterval = setInterval(() => {
-                if (currentIndex < words.length) {
-                    const currentWord = words[currentIndex];
-                    // Append words, handling HTML tags carefully
-                    // This logic assumes HTML tags are well-formed (e.g., <tag>content</tag>) and splits
-                    // on spaces. For more robust HTML handling during streaming, one might need a more complex parser.
-                    // For now, directly appending might break partial tags if a space falls within one.
-                    // A simple heuristic: if a word starts with '<' and doesn't contain '>', it's likely part of a tag.
-                    let appendedText = currentWord;
-                    let nextIndex = currentIndex + 1;
-                    while (appendedText.startsWith('<') && !appendedText.includes('>') && nextIndex < words.length) {
-                        appendedText += words[nextIndex];
-                        nextIndex++;
-                    }
-                    element.innerHTML += appendedText;
-                    currentIndex = nextIndex;
-
-                    // Scroll to bottom if content overflows
-                    element.scrollTop = element.scrollHeight;
-                } else {
-                    clearInterval(streamingInterval);
-                    streamingInterval = null;
-                    callback(); // Run callback after streaming completes
-                }
-            }, 30); // Adjust typing speed here (miliseconds per word/part)
         }
 
 
@@ -1189,19 +1057,18 @@
             const customTopic = customTopicInput.value.trim();
             let currentTopicName;
 
-            // --- Daily Limit Check ---
+            // --- Daily Limit Check (for this version) ---
             let generationCount = parseInt(getCookie(COOKIE_NAME_COUNT) || '0');
             const storedDate = getCookie(COOKIE_NAME_DATE);
             const todayDate = getTodayDateString();
 
-            console.log(`[generateAdvice START] Before check: count=${generationCount}, storedDate=${storedDate}, todayDate=${todayDate}`);
+            console.log(`[generateAdvice START] Before limit check: count=${generationCount}, storedDate=${storedDate}, todayDate=${todayDate}`);
 
             if (storedDate !== todayDate) {
-                // New day, reset count
                 console.log("[generateAdvice] New day detected, resetting count to 0.");
                 generationCount = 0;
                 setCookie(COOKIE_NAME_DATE, todayDate, 1);
-                setCookie(COOKIE_NAME_COUNT, generationCount, 1); // Also set count to 0 immediately
+                setCookie(COOKIE_NAME_COUNT, generationCount, 1);
             }
 
             if (generationCount >= MAX_DAILY_GENERATIONS) {
@@ -1210,16 +1077,14 @@
                     "Dzienny Limit Osiągnięty",
                     `Osiągnięto dzienny limit (${MAX_DAILY_GENERATIONS}) generowania porad. Spróbuj ponownie jutro! ✨`
                 );
-                updateGenerationLimitDisplay(); // Ensure display reflects the limit
-                return; // Stop execution
+                updateGenerationLimitDisplay();
+                return;
             }
 
-            // --- Increment counter immediately for better UX ---
-            // We increment and save here, and will decrement in catch if API fails.
+            // Increment counter BEFORE API call attempt
             generationCount++;
-            console.log(`[generateAdvice] Immediately incremented count to: ${generationCount}`);
-            setCookie(COOKIE_NAME_COUNT, generationCount, 1); // Save new count
-            updateGenerationLimitDisplay(); // Update display with new count
+            setCookie(COOKIE_NAME_COUNT, generationCount, 1);
+            updateGenerationLimitDisplay(); // Update display immediately
 
             // Determine the topic for advice generation
             if (customTopic) {
@@ -1228,11 +1093,11 @@
                 currentTopicName = defaultAdviceCategories[Math.floor(Math.random() * defaultAdviceCategories.length)];
             }
 
-            showLoadingState(); // Show skeleton loading (now only text skeleton)
+            showLoadingState(); // Show skeleton loading
 
             let aiGeneratedRawContent = ''; // Raw content from AI before markdown conversion
 
-            // Używam Twojego klucza API, zgodnie z instrukcją.
+            // Using your API key.
             const googleApiKey = "AIzaSyChSd5TnsmPwLYZAQclq_al2WC4KVULWNg";
 
             // --- Generowanie tekstu (API Gemini) ---
@@ -1427,7 +1292,6 @@
                 });
 
                 if (!geminiResponse.ok) {
-                    // If API returns an HTTP error (e.g., 403), throw an exception
                     throw new Error(`Błąd HTTP z API Gemini! status: ${geminiResponse.status}`);
                 }
 
@@ -1438,26 +1302,19 @@
                     aiGeneratedRawContent = geminiResult.candidates[0].content.parts[0].text;
                     lastGeneratedRawContent = aiGeneratedRawContent; // Store raw content for copying
 
-                    // Counter was already incremented at the start of the function, so no change here
                     console.log(`[generateAdvice SUCCESS] Porada wygenerowana pomyślnie. Obecny licznik: ${generationCount}`);
 
                     // Save to history after successful generation
                     saveAdviceToHistory(aiGeneratedRawContent);
 
-                    // Convert markdown to HTML before streaming
-                    // Using marked.js here
-                    const aiGeneratedHtmlContent = marked.parse(aiGeneratedRawContent);
-
+                    // Convert markdown to HTML and display instantly
                     const adviceDisplay = document.getElementById('adviceDisplay');
-                    // Start text streaming, and then show action buttons
-                    streamTextContent(adviceDisplay, aiGeneratedHtmlContent, () => {
-                        document.getElementById('adviceActions').style.display = 'flex';
-                        if (soundEffectsEnabled) generateSound.play();
-                        if (vibrationEnabled) navigator.vibrate(50); // Small vibrate
-                    });
+                    adviceDisplay.innerHTML = marked.parse(aiGeneratedRawContent);
+                    adviceDisplay.classList.add('show'); // Ensure it's visible
+                    document.getElementById('adviceActions').style.display = 'flex'; // Show action buttons
 
+                    if (vibrationEnabled) navigator.vibrate(50); // Small vibrate
                 } else {
-                    // API call was OK, but response structure is unexpected or content is missing
                     console.error("Nieoczekiwana struktura lub brak zawartości z API Gemini:", geminiResult);
                     showMessageBox(
                         "Błąd Generowania",
@@ -1472,7 +1329,6 @@
                 }
 
             } catch (error) {
-                // Network error, 403 error, etc.
                 console.error("Błąd wywołania API Gemini:", error);
                 showMessageBox(
                     "Błąd Połączenia",
@@ -1514,7 +1370,6 @@
                 buttonElement.textContent = originalText;
             }, 2000);
 
-            if (soundEffectsEnabled) copySound.play();
             if (vibrationEnabled) navigator.vibrate(30); // Very short vibrate
         }
 
@@ -1556,17 +1411,8 @@
 
         themeToggleButton.addEventListener('click', toggleTheme);
 
-        // --- Sound and Vibration Toggles (Not explicitly asked for UI, but included logic) ---
-        // You can add UI buttons for these later if desired.
-        function loadSoundPreference() {
-            const savedSound = localStorage.getItem(LOCAL_STORAGE_SOUND_KEY);
-            if (savedSound === 'false') {
-                soundEffectsEnabled = false;
-            } else {
-                soundEffectsEnabled = true;
-            }
-        }
-
+        // --- Vibration Toggle (Sound effects are removed) ---
+        // You can add UI buttons for this later if desired.
         function loadVibrationPreference() {
             const savedVibration = localStorage.getItem(LOCAL_STORAGE_VIBRATION_KEY);
             if (savedVibration === 'false') {
@@ -1578,10 +1424,9 @@
 
         // --- Initialisation on Load ---
         document.addEventListener('DOMContentLoaded', () => {
-            showCookieConsentBanner(); // Check and show cookie banner
-            updateGenerationLimitDisplay(); // Initial display of limit
+            // Removed showCookieConsentBanner()
+            updateGenerationLimitDisplay(); // Still needed for this version
             loadThemePreference(); // Load user's theme preference
-            loadSoundPreference(); // Load sound preference
             loadVibrationPreference(); // Load vibration preference
             renderAdviceHistory(); // Load and render history
             renderFavoriteAdvice(); // Load and render favorites
