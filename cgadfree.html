@@ -162,6 +162,10 @@
             font-style: italic;
             color: #DA70D6; /* Orchid */
         }
+        #adviceDisplay del { /* Strikethrough style */
+            text-decoration: line-through;
+            color: #888;
+        }
         #adviceDisplay blockquote {
             border-left: none; /* Remove standard blockquote border */
             margin: 1em 0;
@@ -210,30 +214,51 @@
             100% { opacity: 0.5; }
         }
 
-        /* Responsive adjustments for smaller screens */
-        @media (max-width: 600px) {
-            .container {
-                padding: 25px;
-            }
+        /* Skeleton loading styles */
+        .skeleton-loader {
+            width: 100%;
+            height: auto;
+            background-color: #e0e0e0;
+            border-radius: 5px;
+            overflow: hidden;
+            position: relative;
+        }
 
-            h1 {
-                font-size: 1.8em;
-            }
+        .skeleton-loader::before {
+            content: '';
+            display: block;
+            position: absolute;
+            left: -150%;
+            top: 0;
+            height: 100%;
+            width: 50%;
+            background: linear-gradient(to right, transparent 0%, #f0f0f0 50%, transparent 100%);
+            animation: shimmer 1.5s infinite;
+        }
 
-            .input-group input[type="text"] {
-                width: calc(100% - 20px);
-                padding: 10px 15px;
+        @keyframes shimmer {
+            0% {
+                left: -150%;
             }
+            100% {
+                left: 150%;
+            }
+        }
 
-            .advice-button, .copy-button {
-                padding: 12px 20px;
-                font-size: 1em;
-            }
-
-            .button-group {
-                flex-direction: column;
-                gap: 10px;
-            }
+        .skeleton-line {
+            height: 1em;
+            margin-bottom: 0.8em;
+            background-color: #c0c0c0;
+            border-radius: 3px;
+        }
+        .skeleton-line.short {
+            width: 60%;
+        }
+        .skeleton-line.medium {
+            width: 85%;
+        }
+        .skeleton-line.long {
+            width: 100%;
         }
     </style>
 </head>
@@ -248,6 +273,7 @@
         <div class="button-group">
             <button class="advice-button" onclick="generateAdvice()">Wygeneruj nową poradę!</button>
             <button class="copy-button" onclick="copyAdvice()">Kopiuj poradę</button>
+            <!-- Przycisk do generowania obrazów został usunięty -->
         </div>
         <div id="adviceDisplay">
             <!-- Initial message/loading indicator -->
@@ -257,39 +283,191 @@
 
     <script>
         let lastGeneratedRawContent = ""; // Global variable to store the raw, formatted content from AI for copying
+        let streamingInterval = null; // To hold the interval for text streaming
 
         // Default categories for advice if no custom topic is provided
         const defaultAdviceCategories = [
             "przyjaźń", "nauka", "samoopieka", "motywacja", "styl i wizerunek",
-            "finanse", "zdrowie", "relacje", "produktywność", "rozwój osobisty"
+            "finanse", "zdrowie", "relacje", "produktywność", "rozwój osobisty",
+            "chomiki", "koty", "psy", "modne ubrania", "zdrowe jedzenie", "podróże", "kwiaty", "książki"
         ];
+
+
+        /**
+         * Converts markdown text (WhatsApp style) to HTML.
+         * @param {string} markdownText - The text with WhatsApp-style markdown.
+         * @returns {string} - The HTML formatted string.
+         */
+        function convertMarkdownToHtml(markdownText) {
+            let htmlText = markdownText;
+
+            // IMPORTANT: Order matters here to prevent conflicts with nested formatting or special characters.
+
+            // First, handle code blocks (```text```) to prevent inner formatting from being processed
+            htmlText = htmlText.replace(/```(.*?)```/gs, '<pre><code>$1</code></pre>');
+
+            // Then, handle inline code (`text`)
+            htmlText = htmlText.replace(/`(.*?)`/g, '<code>$1</code>');
+
+            // Now, handle bold (*text*)
+            htmlText = htmlText.replace(/\*(.*?)\*/g, '<strong>$1</strong>');
+
+            // Handle italic (_text_) - ensure it doesn't conflict with bold/code
+            htmlText = htmlText.replace(/_(.*?)_/g, '<em>$1</em>');
+
+            // Handle strikethrough (~text~)
+            htmlText = htmlText.replace(/~(.*?)~/g, '<del>$1</del>');
+
+            // Quote conversion: > text -> <blockquote>text</blockquote>
+            // This needs to be done line by line, so split and join
+            const lines = htmlText.split('\n');
+            let processedLines = lines.map(line => {
+                if (line.startsWith('> ')) {
+                    // Use a div or span inside to maintain line breaks if blockquote adds extra margin
+                    return `<blockquote>${line.substring(2)}</blockquote>`;
+                }
+                return line;
+            });
+            htmlText = processedLines.join('\n');
+
+            // Bulleted list conversion: * text or - text
+            // This regex attempts to find lines starting with * or - and wrap them in <li> within a <ul>
+            // This is a simplified conversion. For more robust list handling, a dedicated markdown parser is better.
+            const listPattern = /(\*|\-)\s(.+)/g;
+            let currentListHtml = '';
+            let inList = false;
+
+            const finalLines = htmlText.split('\n');
+            let outputHtml = '';
+
+            for (let i = 0; i < finalLines.length; i++) {
+                const line = finalLines[i];
+                const isListItem = line.match(/^(\*|\-)\s.+/);
+
+                if (isListItem) {
+                    if (!inList) {
+                        outputHtml += '<ul>';
+                        inList = true;
+                    }
+                    outputHtml += `<li>${line.substring(isListItem[0].length - line.trimStart().length + 2).trimStart()}</li>`; // Extract content after bullet and space
+                } else {
+                    if (inList) {
+                        outputHtml += '</ul>';
+                        inList = false;
+                    }
+                    outputHtml += line + '\n'; // Add the line back
+                }
+            }
+            if (inList) { // Close any open list at the end
+                outputHtml += '</ul>';
+            }
+            htmlText = outputHtml;
+
+
+            return htmlText;
+        }
+
+        /**
+         * Simulates a typing/streaming effect for the given HTML content.
+         * @param {HTMLElement} element - The DOM element to stream content into.
+         * @param {string} htmlContent - The full HTML content to be streamed.
+         */
+        function streamTextContent(element, htmlContent) {
+            // Clear any previous streaming interval
+            if (streamingInterval) {
+                clearInterval(streamingInterval);
+                streamingInterval = null;
+            }
+
+            const words = htmlContent.split(/(\s+)/); // Split by word, keeping spaces as separate elements
+            let currentIndex = 0;
+            element.innerHTML = ''; // Clear the display area
+
+            streamingInterval = setInterval(() => {
+                if (currentIndex < words.length) {
+                    // Append words, handling HTML tags carefully
+                    const currentWord = words[currentIndex];
+
+                    // Check if the current word starts an HTML tag or is part of one
+                    if (currentWord.startsWith('<') && !currentWord.includes('>')) {
+                        // This might be the start of a tag, or a partial tag. Find its end.
+                        let fullTag = currentWord;
+                        let tempIndex = currentIndex + 1;
+                        while (tempIndex < words.length && !words[tempIndex].includes('>')) {
+                            fullTag += words[tempIndex];
+                            tempIndex++;
+                        }
+                        if (tempIndex < words.length) { // Found the closing >
+                            fullTag += words[tempIndex];
+                        }
+                        element.innerHTML += fullTag;
+                        currentIndex = tempIndex + 1;
+                    } else {
+                        element.innerHTML += currentWord;
+                        currentIndex++;
+                    }
+
+                    // Scroll to bottom if content overflows
+                    element.scrollTop = element.scrollHeight;
+                } else {
+                    clearInterval(streamingInterval);
+                    streamingInterval = null;
+                }
+            }, 30); // Adjust typing speed here (miliseconds per word/part)
+        }
+
+
+        /**
+         * Displays the skeleton loading state in the adviceDisplay area.
+         * This now only includes lines of text, as image generation is removed.
+         */
+        function showLoadingState() {
+            // Clear any ongoing streaming
+            if (streamingInterval) {
+                clearInterval(streamingInterval);
+                streamingInterval = null;
+            }
+
+            const adviceDisplay = document.getElementById('adviceDisplay');
+            adviceDisplay.classList.remove('show');
+            adviceDisplay.innerHTML = `
+                <div class="skeleton-loader">
+                    <div class="skeleton-line long"></div>
+                    <div class="skeleton-line medium"></div>
+                    <div class="skeleton-line short"></div>
+                    <div class="skeleton-line medium"></div>
+                    <div class="skeleton-line long"></div>
+                    <div class="skeleton-line short"></div>
+                </div>
+            `;
+            adviceDisplay.classList.add('show');
+        }
 
         /**
          * Generates a new piece of advice based on a custom topic or a random default category.
-         * It interacts with the Gemini API to get AI-generated content.
+         * It interacts only with the Gemini API for text generation.
          */
         async function generateAdvice() {
             const customTopicInput = document.getElementById('customTopicInput');
             const customTopic = customTopicInput.value.trim();
-
-            const adviceDisplay = document.getElementById('adviceDisplay');
-            adviceDisplay.classList.remove('show'); // Hide for transition
-            adviceDisplay.innerHTML = '<div class="loading-indicator">Generowanie porady...</div>'; // Show loading indicator
-            adviceDisplay.classList.add('show'); // Show loading indicator with transition
-
             let currentTopicName;
 
             // Determine the topic for advice generation
             if (customTopic) {
                 currentTopicName = customTopic;
             } else {
-                const randomCategoryName = defaultAdviceCategories[Math.floor(Math.random() * defaultAdviceCategories.length)];
-                currentTopicName = randomCategoryName;
+                currentTopicName = defaultAdviceCategories[Math.floor(Math.random() * defaultAdviceCategories.length)];
             }
 
-            // Prepare the detailed prompt for the AI, emphasizing WhatsApp formatting and "cleangirl" style.
-            // All backticks meant to be literal for AI formatting are escaped with an extra backslash.
-            const prompt = `Jesteś "cleangirl" i chcesz stworzyć kompletny poradnik na temat *${currentTopicName}*.
+            showLoadingState(); // Show skeleton loading (now only text skeleton)
+
+            let aiGeneratedRawContent = ''; // Raw content from AI before markdown conversion
+
+            // Klucz API Google jest używany do generowania tekstu (Gemini).
+            const googleApiKey = "AIzaSyChSd5TnsmPwLYZAQclq_al2WC4KVULWNg"; // Your Google API key for Gemini
+
+            // --- Generowanie tekstu (API Gemini) ---
+            const geminiPrompt = `Jesteś "cleangirl" i chcesz stworzyć kompletny poradnik na temat *${currentTopicName}*.
             Twoim zadaniem jest wygenerowanie 3-6 porad, które będą miały **bardzo dużo formatowania** (tylko w stylu WhatsApp), emotikonów Unicode (gwiazdki, serca, niestandardowe kulki, ozdobne linie itp.) i będą wyglądać jak gotowy do wklejenia post na WhatsAppie lub Instagramie.
             Styl powinien być "cleangirl": pozytywny, inspirujący, praktyczny, z lekkim i przyjaznym tonem.
             Każda porada powinna być długa (2-5 zdań) i szczegółowa.
@@ -298,9 +476,9 @@
             - Kursywa: \`_text_\` (np. _Twoja porada_)
             - Pogrubienie: \`*text*\` (np. *ważna informacja*)
             - Przekreślenie: \`~text~\` (np. ~stare podejście~)
-            - Monospace: \`\`\`text\`\`\` (np. \\\`\\\`\\\`kod lub specjalny tekst\\\`\\\`\\\`)
+            - Monospace: \`\`\`text\`\`\` (np. \`\`\`kod lub specjalny tekst\`\`\`)
             - Cytat: \`> text\` (np. > Moja myśl)
-            - Inline code: \`\`text\`\` (np. \\\`mały fragment kodu\\\`)
+            - Inline code: \`\`text\`\` (np. \`mały fragment kodu\`)
             - Lista punktowa:
                 \`* text\`
                 \`* text\`
@@ -310,7 +488,7 @@
             - NIE UŻYWAJ żadnego innego formatowania, np. /tekst/, \\tekst\\.
             - Na koniec dodaj frazę "Zostaw (emotka związana z tematem) dla motywacji", np. "Zostaw ❤️ dla motywacji". Wybierz emotkę pasującą do tematu porady.
             - Na koniec NIE dodawaj żadnego podpisu ani imienia. Po prostu zakończ porady.
-            - Używaj szerokiej gamy emotikonów Unicode (takich jak: 🧋🫂💬, 🎄🍊✨, 🫶🏻🏝️ৎ, 😝🤙🏻, 🥂🌊, 😻🫶🏻, 🫂🏝️, 🥂🤍, 🌙💫, 🪄🌸🎧, 🎀✨, 💖🎀, 🦋💫, 🌸💌, 🍀🌈, 💎🌿, 🌟💖, 💡📓, 🧘‍♀️💆‍♀️, 💅🛍️, 💰📈, 🍎🏋️‍♀️, 🤝🗣️, 🗓️⏰, 🌱✨, 💍, ✈️, ☀️, 🫂, 🩰, 🏄🏼‍♀️, 🌺, 🏝️, 🤍, 🥥, 🎧, 🍃, 🕊️, 🧠, 📚, 🕒, 📖, 😊, 🏃, 🌷, 💭, 🍵, 🕯️, 🤞🏻, 💐, 🌴, 😻, 🏡, 🍪, 📦, 📓, 📸, 🎶, 🥛, 🍨, 💋, 🤭, 😵‍💫, 🥹, 🦈, 🫖, 🧇, 🥞, 🥗, 🦩, 🪼, 🧺, 📦, 📓, 📸, 🎶, 🥛, 🍨, 💋, 🤭, 😵‍💫, 🥹, 🦈, 🫖, 🧇, 🥞, 🥗, 👑, 🙌🏻, 🐆, 📵, 🫧, 🐚, 🍯, 🍓, ☕, 🥝, 🎨, 💗, 🕊️, 🙈).
+            - Używaj szerokiej gamy emotikonów Unicode (takich jak: 🧋🫂💬, 🎄🍊✨, 🫶🏻🏝️ৎ, 😝🤙🏻, 🥂🌊, 😻🫶🏻, 🫂🏝️, 🥂🤍, 🌙💫, 🪄🌸🎧, 🎀✨, 💖🎀, 🦋💫, 🌸💌, 🍀🌈, 💎🌿, 🌟💖,💡📓, 🧘‍♀️💆‍♀️, 💅🛍️, 💰📈, 🍎🏋️‍♀️, 🤝🗣️, 🗓️⏰, 🌱✨, 💍, ✈️, ☀️, 🫂, 🩰, 🏄🏼‍♀️, 🌺, 🏝️, 🤍, 🥥, 🎧, 🍃, 🕊️, 🧠, 📚, 🕒, 📖, 😊, 🏃, 🌷, 💭, 🍵, 🕯️, 🤞🏻, 💐, 🌴, 😻, 🏡, 🍪, 📦, 📓, 📸, 🎶, 🥛, 🍨, 💋, 🤭, 😵‍💫, 🥹, 🦈, 🫖, 🧇, 🥞, 🥗, 👑, 🙌🏻, 🐆, 📵, 🫧, 🐚, 🍯, 🍓, ☕, 🥝, 🎨, 💗, 🕊️, 🙈).
 
             Zwróć **cały gotowy tekst** porady (wraz z wprowadzeniem) jako jedną ciągłą odpowiedź. Nie dodawaj żadnego innego tekstu przed ani po wygenerowanym bloku porad. Wybierz jeden z poniższych stylów formatowania i zastosuj go konsekwentnie w całej generowanej poradzie.
 
@@ -324,16 +502,16 @@
             _Nie przerywaj, nie oceniaj – po prostu bądź obecna. Czasem to wystarczy, żeby ktoś poczuł się *ważny* i wysłuchany. Prawdziwa przyjaźń opiera się na głębokim zrozumieniu i wsparciu, które budują silną więź. ✨_
 
             > Bądź sobą
-            _Nie udawaj kogoś, kim nie jesteś, żeby komuś zaimponować. *Prawdziwa przyjaźń* nie potrzebuje masek ani udawania. Autentyczność to klucz do trwałych relacji, gdzie możesz czuć się swobodnie i bezpiecznie. 💖_
+            _Nie udawaj kogoś, kim nie jesteś, żeby komuś zaimponować. *Prawdziwa przyjaźń* nie potrzebuje masek ani udawania. Autentyczność to klucz do trwałych relacji, gdzie możesz czuć się swobodnie i bezpiecznie.💖_
 
             > Odpisuj, nawet krótko
-            _Nie musisz pisać elaboratu za każdym razem. Nawet szybkie „Hej, widziałam, dzięki!” czy „Później pogadamy!” pokazuje, że Ci zależy i pamiętasz o drugiej osobie. *Małe gesty* budują poczucie bliskości. 🎀_
+            _Nie musisz pisać elaboratu za każdym razem. Nawet szybkie „Hej, widziałam, dzięki!” czy „Później pogadamy!” pokazuje, że Ci zależy i pamiętasz o drugiej osobie. *Małe gesty* budują poczucie bliskości.🎀_
 
             > Nie bój się przeprosić
-            _Jeśli coś zepsułaś – przyznaj to. Przyjaciel nie oczekuje perfekcji, tylko szczerości i gotowości do naprawienia błędu. Umiejętność przepraszania pokazuje *dojrzałość* i szacunek dla Waszej relacji. 🌷_
+            _Jeśli coś zepsułaś – przyznaj to. Przyjaciel nie oczekuje perfekcji, tylko szczerości i gotowości do naprawienia błędu. Umiejętność przepraszania pokazuje *dojrzałość* i szacunek dla Waszej relacji.🌷_
 
             > Ciesz się z sukcesów drugiej osoby
-            _To nie wyścig ani rywalizacja. Jeśli ktoś z Twoich ludzi coś osiąga – *świętuj razem z nim*! Szczerze okazywana radość wzmacnia więź i buduje wzajemne zaufanie. To prawdziwa definicja wsparcia. 🚀_
+            _To nie wyścig ani rywalizacja. Jeśli ktoś z Twoich ludzi coś osiąga – *świętuj razem z nim*! Szczerze okazywana radość wzmacnia więź i buduje wzajemne zaufanie. To prawdziwa definicja wsparcia.🚀_
             Zostaw 🫂 dla motywacji!
 
             ---
@@ -351,7 +529,7 @@
 
             ---
 
-            _Good morning!_ 🧇
+            _Good morning!_🧇
 
             > Jak tam, wyspane? 🥂
             > Ja nawet tak! 🫧
@@ -369,8 +547,8 @@
             > Wyspane🤞🏻?
             > Ja średnio ostatnio nie umiem się wysypać [hah] 🤭
 
-            > Śniadanko dla was girls 🤘🏻!
-            > \\\`\\\`\\\`🥞🥗🍵🧇\\\`\\\`\\\`
+            > Śniadanko dla was girls🤘🏻!
+            > \`\`\`🥞🥗🍵🧇\`\`\`
 
             > Macie jakieś plany 🥂?
             > Ja mam w planach naukę na jutrzejszy sprawdzian z matmy 😵‍💫🥹!
@@ -433,24 +611,24 @@
 
             ---
 
-            \\\`selfcare night — wieczór tylko dla siebie!\\\`🛁🕯️💗
+            \`selfcare night — wieczór tylko dla siebie!\`🛁🕯️💗
 
-            𓂃 ₊˚⊹ \\\`zacznij od odłożenia telefonu.\\\` 🌴
+            𓂃 ₊˚⊹ \`zacznij od odłożenia telefonu.\` 🌴
             _to Twój czas offline — świat poczeka 📵✨_
             ≻───── ⋆✩⋆ ─────≺
-            * *\\\`ciepły prysznic lub kąpiel\\\`* 🪼
+            * *\`ciepły prysznic lub kąpiel\`* 🪼
             _użyj pachnącego żelu, zapal świeczkę i pozwól sobie na relaks 🛁🫧🕯️_
             ≻───── ⋆✩⋆ ─────≺
-            * *\\\`maska na twarz, olejek na włosy\\\`*🌊
-            _zadbaj o siebie jak o najlepszą przyjaciółkę 💆‍♀️🍯_
+            * *\`maska na twarz, olejek na włosy\`*🌊
+            _zadbaj o siebie jak o najlepszą przyjaciółkę💆‍♀️🍯_
             ≻───── ⋆✩⋆ ─────≺
-            * *\\\`ulubiony napój + coś lekkiego\\\`*🍹
+            * *\`ulubiony napój + coś lekkiego\`*🍹
             _herbatka, kakao, może owoce? 🍓☕🥝_
             ≻───── ⋆✩⋆ ─────≺
-            * *\\\`coś co cię uspokoi\\\`*🥥
+            * *\`coś co cię uspokoi\`*🥥
             _książka, journaling, malowanie, muzyka – cokolwiek działa na Twoją duszę 🎶📖🎨_
             ≻───── ⋆✩⋆ ─────≺
-            * *\\\`spisz 3 rzeczy, za które  dzis dziękujesz\\\`*🧺
+            * *\`spisz 3 rzeczy, za które  dzis dziękujesz\\\`*🧺
             _wdzięczność koi serce 💗🕊️_
             ≻───── ⋆✩⋆ ─────≺
             ˗ˏˋ 💌 _Bo czas dla siebie to nie luksus — to potrzeba._ ˎˊ˗
@@ -463,137 +641,93 @@
             `;
 
             let chatHistory = [];
-            chatHistory.push({ role: "user", parts: [{ text: prompt }] });
+            chatHistory.push({ role: "user", parts: [{ text: geminiPrompt }] });
 
-            const payload = {
+            const geminiPayload = {
                 contents: chatHistory,
                 generationConfig: {
-                    // Expect AI to return raw text with Markdown/Unicode formatting
                     responseMimeType: "text/plain"
                 }
             };
 
-            // Your API key is preserved.
-            const apiKey = "AIzaSyChSd5TnsmPwLYZAQclq_al2WC4KVULWNg";
-            const apiUrl = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=${apiKey}`;
-
             try {
-                const response = await fetch(apiUrl, {
+                const geminiResponse = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=${googleApiKey}`, {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify(payload)
+                    body: JSON.stringify(geminiPayload)
                 });
 
-                if (!response.ok) {
-                    throw new Error(`HTTP error! status: ${response.status}`);
+                if (!geminiResponse.ok) {
+                    throw new Error(`Błąd HTTP z API Gemini! status: ${geminiResponse.status}`);
                 }
 
-                const result = await response.json();
-                console.log("Raw API response:", result);
+                const geminiResult = await geminiResponse.json();
+                if (geminiResult.candidates && geminiResult.candidates.length > 0 &&
+                    geminiResult.candidates[0].content && geminiResult.candidates[0].content.parts &&
+                    geminiResult.candidates[0].content.parts.length > 0) {
+                    aiGeneratedRawContent = geminiResult.candidates[0].content.parts[0].text;
+                    lastGeneratedRawContent = aiGeneratedRawContent; // Przechowaj surową zawartość do kopiowania
 
-                if (result.candidates && result.candidates.length > 0 &&
-                    result.candidates[0].content && result.candidates[0].content.parts &&
-                    result.candidates[0].content.parts.length > 0) {
-                    let aiGeneratedContent = result.candidates[0].content.parts[0].text;
-                    lastGeneratedRawContent = aiGeneratedContent; // Store raw content for copying
+                    // Konwertuj markdown na HTML przed strumieniowaniem
+                    const aiGeneratedHtmlContent = convertMarkdownToHtml(aiGeneratedRawContent);
 
-                    // Apply WhatsApp formatting to HTML
-                    aiGeneratedContent = aiGeneratedContent.replace(/\*(.*?)\*/g, '<strong>$1</strong>'); // Bold *text*
-                    aiGeneratedContent = aiGeneratedContent.replace(/_(.*?)_/g, '<em>$1</em>');       // Italic _text_
-                    aiGeneratedContent = aiGeneratedContent.replace(/~(.*?)~/g, '<del>$1</del>');       // Strikethrough ~text~
-                    
-                    // Monospace and Inline code require careful handling to avoid conflicts.
-                    // Replace monospace first, which uses three backticks.
-                    aiGeneratedContent = aiGeneratedContent.replace(/```(.*?)```/gs, '<pre><code>$1</code></pre>'); // Monospace ```text```
-                    // Then replace inline code, which uses single backticks.
-                    aiGeneratedContent = aiGeneratedContent.replace(/`(.*?)`/g, '<code>$1</code>');       // Inline code `text`
-
-                    // Quote conversion: > text -> | text
-                    aiGeneratedContent = aiGeneratedContent.replace(/^> (.*)$/gm, '<blockquote>$1</blockquote>');
-
-                    // Bulleted list conversion: * text or - text
-                    // This regex attempts to find lines starting with * or - and wrap them in <li> within a <ul>
-                    aiGeneratedContent = aiGeneratedContent.replace(/(\*|\-)\s(.*?)(\n|$)/g, '<li>$2</li>');
-                    if (aiGeneratedContent.includes('<li>')) {
-                        // This regex tries to find groups of <li> and wrap them in <ul>.
-                        // It's not perfect for complex nested lists but works for simple flat ones.
-                        // We also need to prevent wrapping lists inside lists or other blocks.
-                        // A more robust way would involve parsing, but for simple cases, this aims to aggregate.
-                        let tempContent = aiGeneratedContent;
-                        let listMatches = [];
-                        let ulPattern = /(<li>.*?<\/li>[\n\s]*)+/gs;
-                        let match;
-
-                        while ((match = ulPattern.exec(tempContent)) !== null) {
-                            listMatches.push({
-                                start: match.index,
-                                end: match.index + match[0].length,
-                                content: `<ul>${match[0]}</ul>`
-                            });
-                        }
-
-                        // Reconstruct content, replacing found list items with ul wrapped ones
-                        let lastIndex = 0;
-                        let newContentParts = [];
-                        listMatches.forEach(listMatch => {
-                            newContentParts.push(tempContent.substring(lastIndex, listMatch.start));
-                            newContentParts.push(listMatch.content);
-                            lastIndex = listMatch.end;
-                        });
-                        newContentParts.push(tempContent.substring(lastIndex));
-                        aiGeneratedContent = newContentParts.join('');
-                    }
+                    const adviceDisplay = document.getElementById('adviceDisplay');
+                    // Wyczyść wyświetlanie
+                    adviceDisplay.innerHTML = '';
 
 
-                    adviceDisplay.innerHTML = aiGeneratedContent;
-                    adviceDisplay.classList.add('show');
-                    // Clear custom topic input after successful generation
-                    customTopicInput.value = '';
+                    // Utwórz span do przechowywania strumieniowanego tekstu
+                    const textContainer = document.createElement('span');
+                    adviceDisplay.appendChild(textContainer);
+
+                    // Rozpocznij strumieniowanie tekstu
+                    streamTextContent(textContainer, aiGeneratedHtmlContent);
 
                 } else {
-                    // Handle cases where AI response structure is unexpected or empty
-                    adviceDisplay.innerHTML = `<div class="error-message">Wystąpił problem z wygenerowaniem porady. Spróbuj ponownie.</div>`;
+                    console.error("Nieoczekiwana struktura lub brak zawartości z API Gemini:", geminiResult);
+                    const adviceDisplay = document.getElementById('adviceDisplay');
+                    adviceDisplay.innerHTML += `<div class="error-message">Wystąpił problem z wygenerowaniem porady tekstowej. Spróbuj ponownie.</div>`;
                     adviceDisplay.classList.add('show');
-                    console.error("Nieoczekiwana struktura odpowiedzi API lub brak treści:", result);
                 }
 
             } catch (error) {
-                // Handle network or API call errors
-                adviceDisplay.innerHTML = `<div class="error-message">Błąd połączenia: ${error.message}. Spróbuj ponownie później.</div>`;
+                console.error("Błąd wywołania API Gemini:", error);
+                const adviceDisplay = document.getElementById('adviceDisplay');
+                adviceDisplay.innerHTML += `<div class="error-message">Błąd połączenia z API Gemini: ${error.message}. Spróbuj ponownie.</div>`;
                 adviceDisplay.classList.add('show');
-                console.error("Błąd podczas wywoływania API Gemini:", error);
             }
+
+            customTopicInput.value = ''; // Wyczyść pole własnego tematu
         }
 
         /**
-         * Copies the last generated raw advice content to the clipboard.
-         * Provides visual feedback to the user upon successful copy.
+         * Kopiuje ostatnio wygenerowaną surową zawartość porady do schowka.
+         * Zapewnia wizualne potwierdzenie dla użytkownika po pomyślnym skopiowaniu.
          */
         function copyAdvice() {
             if (!lastGeneratedRawContent) {
-                // Inform user if there's no advice to copy yet
                 const adviceDisplay = document.getElementById('adviceDisplay');
                 adviceDisplay.innerHTML = '<p class="loading-indicator">Brak porady do skopiowania. Wygeneruj ją najpierw!</p>';
                 adviceDisplay.classList.add('show');
                 return;
             }
 
-            // Create a temporary textarea to hold the content for copying
             const tempTextArea = document.createElement('textarea');
             tempTextArea.value = lastGeneratedRawContent;
-            document.body.appendChild(tempTextArea); // Append to body to make it selectable
-            tempTextArea.select(); // Select the text
-            document.execCommand('copy'); // Execute copy command
-            document.body.removeChild(tempTextArea); // Remove the temporary textarea
+            document.body.appendChild(tempTextArea);
+            tempTextArea.select();
+            document.execCommand('copy');
+            document.body.removeChild(tempTextArea);
 
-            // Provide visual feedback on the button
             const copyButton = document.querySelector('.copy-button');
             const originalText = copyButton.textContent;
             copyButton.textContent = 'Skopiowano! ✅';
             setTimeout(() => {
-                copyButton.textContent = originalText; // Revert button text after a delay
+                copyButton.textContent = originalText;
             }, 2000);
         }
+
+        // Funkcja toggleImageGeneration została usunięta
     </script>
 
 </body>
