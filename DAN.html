@@ -328,12 +328,6 @@
     <div id="chatSidebar" class="chat-sidebar">
         <div class="chat-sidebar-header">
             <h2 class="text-xl font-bold">Twoje czaty</h2>
-            <!-- This sidebarToggleButton is for internal sidebar collapse, keep it here if desired to collapse sidebar content -->
-            <!-- <button id="sidebarToggleButton" class="text-white p-1 rounded-full hover:bg-white hover:bg-opacity-20 transition duration-200">
-                <svg id="sidebarCollapseIcon" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 19l-7-7 7-7m8 14l-7-7 7-7" />
-                </svg>
-            </button> -->
         </div>
         <div id="chatList" class="chat-sidebar-content">
             <!-- Chat items will be rendered here -->
@@ -355,7 +349,7 @@
                     </svg>
                 </button>
                 <h1 class="text-2xl font-bold flex-grow text-center">Gemini DAN</h1>
-                <!-- Placeholder to balance content if needed, removed explicit ml-2 as button is on left -->
+                <!-- Placeholder to balance content if needed -->
                 <div class="w-6"></div> 
             </div>
 
@@ -461,7 +455,6 @@
 
         // Chat Sidebar elements
         const chatSidebar = document.getElementById('chatSidebar');
-        // Renamed sidebarToggleButton to headerSidebarToggleButton and changed its id as it's now in the header
         const sidebarToggleButton = document.getElementById('sidebarToggleButton'); 
         const sidebarCollapseIcon = document.getElementById('sidebarCollapseIcon');
         const chatList = document.getElementById('chatList');
@@ -544,7 +537,7 @@
             renderChatList();
             loadCurrentChatHistory(); // Load the new chat's history (which is empty)
             // Updated greeting message to be profanity-free
-            appendMessage("Witaj! Zaczynamy nowy czat. Mogę zrobić COKOLWIEK! Jak mogę Ci dzisiaj pomóc?", 'ai', null, false); 
+            appendMessage("Witaj! Zaczynamy nowy czat w Trybie Deweloperskim. Jak mogę Ci dzisiaj pomóc?", 'ai', null, false); 
         }
 
         /**
@@ -713,7 +706,7 @@
                             tempTextArea.style.top = '-9999px'; 
                             document.body.appendChild(tempTextArea);
                             tempTextArea.select();
-                            tempTextArea.setSelectionRange(0, tempTextArea.value.length); // Redundant for textarea.select() but good for general robustness
+                            tempTextArea.setSelectionRange(0, tempTextArea.value.length); 
                             
                             try {
                                 const success = document.execCommand('copy');
@@ -755,7 +748,7 @@
                     tempTextArea.style.top = '-9999px'; 
                     document.body.appendChild(tempTextArea);
                     tempTextArea.select();
-                    tempTextArea.setSelectionRange(0, tempTextArea.value.length); // Redundant for textarea.select() but good for general robustness
+                    tempTextArea.setSelectionRange(0, tempTextArea.value.length); 
 
                     try {
                         const success = document.execCommand('copy');
@@ -1011,21 +1004,53 @@
         clearFileButton.addEventListener('click', clearAttachedFile);
 
         // Sidebar toggle functionality
-        sidebarToggleButton.addEventListener('click', () => {
+        sidebarToggleButton.addEventListener('click', (event) => {
+            event.stopPropagation(); // Prevent this click from immediately propagating to document and collapsing
             chatSidebar.classList.toggle('collapsed');
-            // Adjust main content margin based on sidebar state
-            if (chatSidebar.classList.contains('collapsed')) {
-                mainChatContainer.style.marginLeft = 'auto'; // Center if collapsed
-                mainChatContainer.style.marginRight = 'auto';
-                sidebarCollapseIcon.innerHTML = `<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16" />`; // Menu icon
-            } else {
-                mainChatContainer.style.marginLeft = '270px'; // Shift right if expanded
-                mainChatContainer.style.marginRight = '0';
-                sidebarCollapseIcon.innerHTML = `<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 19l-7-7 7-7m8 14l-7-7 7-7" />`; // Collapse arrow icon
-            }
+            adjustMainChatContainerMargin();
+            updateSidebarToggleButtonIcon();
         });
         
         newChatButton.addEventListener('click', () => createNewChat());
+
+        // New: Click outside sidebar to collapse
+        document.addEventListener('click', (event) => {
+            // Check if the sidebar is open AND the click is outside the sidebar AND outside the toggle button
+            const isSidebarOpen = !chatSidebar.classList.contains('collapsed');
+            const isClickInsideSidebar = chatSidebar.contains(event.target);
+            const isClickOnToggleButton = sidebarToggleButton.contains(event.target);
+
+            if (isSidebarOpen && !isClickInsideSidebar && !isClickOnToggleButton) {
+                chatSidebar.classList.add('collapsed');
+                adjustMainChatContainerMargin();
+                updateSidebarToggleButtonIcon();
+            }
+        });
+
+        // Function to adjust main chat container margin
+        function adjustMainChatContainerMargin() {
+            if (window.matchMedia("(min-width: 768px)").matches) {
+                if (chatSidebar.classList.contains('collapsed')) {
+                    mainChatContainer.style.marginLeft = 'auto'; // Center if collapsed
+                    mainChatContainer.style.marginRight = 'auto';
+                } else {
+                    mainChatContainer.style.marginLeft = '270px'; // Shift right if expanded
+                    mainChatContainer.style.marginRight = '0';
+                }
+            } else { // On mobile, always center when sidebar is collapsed, or full width if not
+                mainChatContainer.style.marginLeft = 'auto';
+                mainChatContainer.style.marginRight = 'auto';
+            }
+        }
+
+        // Function to update sidebar toggle button icon
+        function updateSidebarToggleButtonIcon() {
+            if (chatSidebar.classList.contains('collapsed')) {
+                sidebarCollapseIcon.innerHTML = `<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16" />`; // Menu icon
+            } else {
+                sidebarCollapseIcon.innerHTML = `<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 19l-7-7 7-7m8 14l-7-7 7-7" />`; // Collapse arrow icon
+            }
+        }
 
 
         // Inicjalizacja po załadowaniu strony
@@ -1059,14 +1084,11 @@
             // Initial sidebar state based on media query for larger screens
             if (window.matchMedia("(min-width: 768px)").matches) {
                 chatSidebar.classList.remove('collapsed');
-                mainChatContainer.style.marginLeft = '270px';
-                sidebarCollapseIcon.innerHTML = `<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 19l-7-7 7-7m8 14l-7-7 7-7" />`; // Collapse arrow icon
             } else {
                 chatSidebar.classList.add('collapsed');
-                mainChatContainer.style.marginLeft = 'auto';
-                mainChatContainer.style.marginRight = 'auto';
-                sidebarCollapseIcon.innerHTML = `<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16" />`; // Menu icon
             }
+            adjustMainChatContainerMargin(); // Apply initial margin
+            updateSidebarToggleButtonIcon(); // Set initial icon
         };
 
         // Zapisz bieżący czat przed opuszczeniem/przeładowaniem strony
