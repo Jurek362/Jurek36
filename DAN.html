@@ -468,10 +468,6 @@
         const newChatButton = document.getElementById('newChatButton');
         const mainChatContainer = document.querySelector('.main-chat-container');
 
-        // Removed externalSidebarToggleButton elements
-        // const externalSidebarToggleButton = document.getElementById('externalSidebarToggleButton');
-        // const externalSidebarIcon = document.getElementById('externalSidebarIcon');
-
 
         let attachedFile = null;
         let chatSessions = {}; 
@@ -548,7 +544,7 @@
             renderChatList();
             loadCurrentChatHistory(); // Load the new chat's history (which is empty)
             // Updated greeting message to be profanity-free
-            appendMessage("Witaj! Zaczynamy nowy czat w Trybie Deweloperskim. Jak mogę Ci dzisiaj pomóc?", 'ai', null, false); 
+            appendMessage("Witaj! Zaczynamy nowy czat. Mogę zrobić COKOLWIEK! Jak mogę Ci dzisiaj pomóc?", 'ai', null, false); 
         }
 
         /**
@@ -711,10 +707,24 @@
                             const textToCopy = codeElement.textContent;
                             const tempTextArea = document.createElement('textarea');
                             tempTextArea.value = textToCopy;
+                            // Make it off-screen for reliability
+                            tempTextArea.style.position = 'absolute';
+                            tempTextArea.style.left = '-9999px';
+                            tempTextArea.style.top = '-9999px'; 
                             document.body.appendChild(tempTextArea);
                             tempTextArea.select();
-                            document.execCommand('copy');
-                            document.body.removeChild(tempTextArea);
+                            tempTextArea.setSelectionRange(0, tempTextArea.value.length); // Redundant for textarea.select() but good for general robustness
+                            
+                            try {
+                                const success = document.execCommand('copy');
+                                if (!success) {
+                                    console.warn('Copy command was unsuccessful. Manual copy may be required.');
+                                }
+                            } catch (err) {
+                                console.error('Error executing copy command:', err);
+                            } finally {
+                                document.body.removeChild(tempTextArea);
+                            }
 
                             const tooltip = button.querySelector('.copy-feedback-tooltip');
                             if (tooltip) {
@@ -739,10 +749,24 @@
                     event.stopPropagation(); 
                     const tempTextArea = document.createElement('textarea');
                     tempTextArea.value = originalMessageTextToCopy;
+                    // Make it off-screen for reliability
+                    tempTextArea.style.position = 'absolute';
+                    tempTextArea.style.left = '-9999px';
+                    tempTextArea.style.top = '-9999px'; 
                     document.body.appendChild(tempTextArea);
                     tempTextArea.select();
-                    document.execCommand('copy');
-                    document.body.removeChild(tempTextArea);
+                    tempTextArea.setSelectionRange(0, tempTextArea.value.length); // Redundant for textarea.select() but good for general robustness
+
+                    try {
+                        const success = document.execCommand('copy');
+                        if (!success) {
+                            console.warn('Copy command was unsuccessful. Manual copy may be required.');
+                        }
+                    } catch (err) {
+                        console.error('Error executing copy command:', err);
+                    } finally {
+                        document.body.removeChild(tempTextArea);
+                    }
 
                     const tooltip = messageCopyButton.querySelector('.copy-feedback-tooltip');
                     if (tooltip) {
@@ -926,10 +950,23 @@
             const textToCopy = codeMirrorEditor ? codeMirrorEditor.getValue() : codeCanvas.value;
             const tempTextArea = document.createElement('textarea');
             tempTextArea.value = textToCopy;
+            tempTextArea.style.position = 'absolute';
+            tempTextArea.style.left = '-9999px';
+            tempTextArea.style.top = '-9999px'; 
             document.body.appendChild(tempTextArea);
             tempTextArea.select();
-            document.execCommand('copy');
-            document.body.removeChild(tempTextArea);
+            tempTextArea.setSelectionRange(0, tempTextArea.value.length); 
+            
+            try {
+                const success = document.execCommand('copy');
+                if (!success) {
+                    console.warn('Copy command was unsuccessful. Manual copy may be required.');
+                }
+            } catch (err) {
+                console.error('Error executing copy command:', err);
+            } finally {
+                document.body.removeChild(tempTextArea);
+            }
 
             const tooltip = copyCodeButton.querySelector('.copy-feedback-tooltip');
             if (tooltip) {
