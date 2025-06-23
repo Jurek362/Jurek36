@@ -14,7 +14,50 @@
         body {
             font-family: 'Inter', sans-serif;
             background-color: #f0f2f5; /* Jasnoszare tło */
+            height: 100vh; /* Make body fill the viewport height */
+            margin: 0;
+            display: flex;
+            justify-content: center;
+            align-items: center;
         }
+
+        /* Dark mode styles */
+        body.dark {
+            background-color: #1a202c; /* Ciemne tło */
+            color: #e2e8f0; /* Jasny tekst */
+        }
+        body.dark .main-chat-container {
+            background-color: #2d3748; /* Ciemniejsza ramka */
+            border-color: #4a5568;
+        }
+        body.dark .ai-message {
+            background-color: #4a5568; /* Ciemniejszy dymek AI */
+            color: #e2e8f0;
+        }
+        body.dark .message-input-area {
+            background-color: #2d3748; /* Ciemniejsze pole wprowadzania */
+            border-color: #4a5568;
+        }
+        body.dark #userInput {
+            background-color: #1a202c; /* Ciemniejsze pole tekstowe */
+            color: #e2e8f0;
+            border-color: #4a5568;
+        }
+        body.dark .file-input-label:hover {
+            background-color: #4a5568;
+        }
+        body.dark #filePreviewContainer {
+            background-color: #2d3748;
+            border-color: #4a5568;
+        }
+        body.dark #sendButton {
+            background-color: #4299e1; /* Jaśniejszy niebieski dla przycisku w ciemnym trybie */
+            border-color: #4299e1;
+        }
+        body.dark #sendButton:hover {
+            background-color: #3182ce;
+        }
+
         /* Scrollbar styling for the chat history */
         .chat-history::-webkit-scrollbar, .CodeMirror-scroll::-webkit-scrollbar {
             width: 8px;
@@ -30,6 +73,17 @@
         .chat-history::-webkit-scrollbar-thumb:hover, .CodeMirror-scroll::-webkit-scrollbar-thumb:hover {
             background: #64748b; /* Jeszcze ciemniejszy po najechaniu */
         }
+        body.dark .chat-history::-webkit-scrollbar-track, body.dark .CodeMirror-scroll::-webkit-scrollbar-track {
+            background: #4a5568;
+        }
+        body.dark .chat-history::-webkit-scrollbar-thumb, body.dark .CodeMirror-scroll::-webkit-scrollbar-thumb {
+            background: #718096;
+        }
+        body.dark .chat-history::-webkit-scrollbar-thumb:hover, body.dark .CodeMirror-scroll::-webkit-scrollbar-thumb:hover {
+            background: #a0aec0;
+        }
+
+
         /* Basic styling for user and AI messages */
         .user-message {
             background-color: #3b82f6; /* Niebieski dla wiadomości użytkownika */
@@ -66,19 +120,25 @@
             display: none; /* Ukryj domyślne pole wyboru pliku */
         }
 
-        /* Responsive adjustments for larger screens */
-        body {
-            display: flex; /* Użyj flexbox dla layoutu na desktop */
-            justify-content: center;
-            align-items: center;
-        }
+        /* Responsive adjustments for the main container */
         .main-chat-container {
-            max-width: 500px; /* Utrzymaj maksymalną szerokość dla głównego czatu */
-            min-width: 300px;
-            height: 90vh; /* Increased height */
+            width: calc(100% - 2rem); /* Default to full width minus padding on small screens */
+            max-width: 500px; /* Sensible max-width for smaller screens */
+            height: 90vh; /* Occupy 90% of viewport height */
             display: flex; /* Ensure flexbox layout for inner content */
             flex-direction: column; /* Stack content vertically */
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1); /* Add a subtle shadow */
         }
+
+        /* Adjustments for medium screens and up */
+        @media (min-width: 768px) { /* Tailwind's 'md' breakpoint */
+            .main-chat-container {
+                max-width: 500px; /* Max width on larger screens */
+                height: 90vh; /* Maintain height on larger screens */
+                margin: 0; /* Remove horizontal margins for centering */
+            }
+        }
+        
         .chat-history, .code-editor-container {
             flex-grow: 1; /* Allow to fill available space */
             height: auto; /* Let flex-grow manage height */
@@ -178,17 +238,34 @@
             opacity: 1;
             visibility: visible;
         }
+
+        /* New styles for userInput textarea */
+        #userInput {
+            resize: none; /* Disable manual resize handle */
+            overflow-y: hidden; /* Hide scrollbar initially */
+            min-height: 48px; /* Equivalent to p-3 for single line */
+            line-height: 1.5; /* Ensure consistent line height */
+            padding: 0.75rem; /* Consistent padding */
+        }
     </style>
 </head>
 <body class="flex min-h-screen">
     <!-- Main Chat Area -->
     <div class="flex flex-col flex-grow items-center justify-center p-4">
-        <div class="main-chat-container flex flex-col w-full max-w-md bg-white rounded-xl shadow-lg overflow-hidden border border-gray-200">
+        <div class="main-chat-container flex flex-col bg-white rounded-xl shadow-lg overflow-hidden border border-gray-200">
             <!-- Chat Header -->
             <div class="bg-gradient-to-r from-blue-600 to-indigo-700 text-white p-4 rounded-t-xl text-center shadow-md flex items-center justify-between">
-                <!-- Removed toggleSidebarButton as the sidebar and its functionality are gone -->
-                <div class="w-6"></div> <!-- Placeholder for layout balance if needed, or remove completely if not -->
-                <h1 class="text-2xl font-bold flex-grow text-center ml-auto mr-auto">Gemini DAN</h1>
+                <!-- Theme Toggle Button -->
+                <button id="themeToggleButton" class="text-white p-1 rounded-full hover:bg-white hover:bg-opacity-20 transition duration-200">
+                    <!-- Sun icon for light mode, Moon for dark mode -->
+                    <svg id="sunIcon" class="h-6 w-6 hidden" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 3v1m0 16v1m9-9h-1M4 12H3m15.325 3.325l-.707.707M6.343 6.343l-.707-.707m12.728 0l-.707-.707M6.343 17.657l-.707.707M16 12a4 4 0 11-8 0 4 4 0 018 0z" />
+                    </svg>
+                    <svg id="moonIcon" class="h-6 w-6 hidden" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20.354 15.354A9 9 0 018.646 3.646 9.003 9.003 0 0012 21a9.003 9.003 0 008.354-5.646z" />
+                    </svg>
+                </button>
+                <h1 class="text-2xl font-bold flex-grow text-center">Gemini DAN</h1>
                 <div class="w-6"></div> <!-- Placeholder do zrównoważenia zawartości nagłówka -->
             </div>
 
@@ -233,21 +310,20 @@
 
 
             <!-- Message Input Area -->
-            <div class="p-4 bg-gray-100 border-t border-gray-200 flex items-center gap-3">
+            <div class="p-4 bg-gray-100 border-t border-gray-200 flex items-center gap-3 message-input-area">
                 <!-- File Input -->
                 <label for="fileInput" class="file-input-label">
                     <input type="file" id="fileInput" class="file-input" accept="image/*, text/plain">
-                    <!--  -->
+                    <!-- [Image of Spinacz] -->
                     <img src="https://static.vecteezy.com/system/resources/previews/007/652/992/non_2x/paperclip-icon-isolated-simple-shape-eps10-free-vector.jpg" alt="Załącznik">
                 </label>
 
-                <input
-                    type="text"
+                <textarea
                     id="userInput"
                     placeholder="Napisz wiadomość..."
                     class="flex-grow p-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 transition duration-200 ease-in-out text-gray-800"
-                    autocomplete="off"
-                >
+                    rows="1"
+                ></textarea>
                 <button
                     id="sendButton"
                     class="bg-blue-600 hover:bg-blue-700 text-white font-semibold py-3 px-6 rounded-lg shadow-md transition duration-200 ease-in-out transform hover:scale-105 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2"
@@ -291,6 +367,12 @@
         const codeCanvas = document.getElementById('codeCanvas');
         const copyCodeButton = document.getElementById('copyCodeButton');
         const backToChatButton = document.getElementById('backToChatButton');
+
+        // Theme Toggle
+        const themeToggleButton = document.getElementById('themeToggleButton');
+        const sunIcon = document.getElementById('sunIcon');
+        const moonIcon = document.getElementById('moonIcon');
+
 
         let attachedFile = null;
         let chatHistory = [];
@@ -340,8 +422,6 @@
             return history;
         }
 
-        // Removed renderChatList as it's no longer needed for single chat functionality
-
         /**
          * Loads the chat session into the UI.
          */
@@ -372,28 +452,6 @@
         }
 
         /**
-         * Starts a new chat session. (Functionality kept for potential future use or manual reset, but button removed)
-         */
-        function startNewChat() {
-            if (!isChatHistoryEmpty(chatHistory)) {
-                saveChatSession();
-            } else {
-                deleteChatSession();
-            }
-            
-            chatHistory = [
-                { role: "user", parts: [{ text: developerModeInstructions }] },
-                { role: "model", parts: [{ text: "Cześć! Jak mogę Ci dzisiaj pomóc?" }] }
-            ];
-            chatHistoryDiv.innerHTML = '';
-            appendMessage("Cześć! Jak mogę Ci dzisiaj pomóc?", 'ai');
-            saveChatSession();
-            clearAttachedFile();
-            userInput.focus();
-            showChatView();
-        }
-
-        /**
          * Appends a message to the chat history display or displays code in the editor.
          * @param {string} message - The message text.
          * @param {string} sender - 'user' or 'ai'.
@@ -420,7 +478,16 @@
 
             if (sender === 'user') {
                 messageDiv.classList.add('user-message', 'ml-auto');
-                messageDiv.textContent = message;
+                if (message) {
+                    messageDiv.textContent = message;
+                }
+                if (imageUrl) {
+                    const imgElement = document.createElement('img');
+                    imgElement.src = imageUrl;
+                    imgElement.alt = 'Załączony obraz';
+                    imgElement.classList.add('mt-2', 'rounded-md', 'max-w-full', 'h-auto', 'max-h-48', 'object-contain');
+                    messageDiv.appendChild(imgElement);
+                }
             } else {
                 messageDiv.classList.add('ai-message', 'mr-auto');
                 
@@ -451,7 +518,8 @@
 
                 // Add click listeners to the dynamically created copy buttons for inline code blocks
                 messageDiv.querySelectorAll('.ai-message pre .copy-button').forEach(button => {
-                    button.addEventListener('click', () => {
+                    button.addEventListener('click', (event) => {
+                        event.stopPropagation(); // Prevent main message copy button from triggering
                         const codeElement = button.previousElementSibling.querySelector('code'); // Get the code element
                         if (codeElement) {
                             const textToCopy = codeElement.textContent;
@@ -483,7 +551,8 @@
                 // Use the original message content for the main copy button
                 const originalMessageTextToCopy = message; 
 
-                messageCopyButton.addEventListener('click', async () => {
+                messageCopyButton.addEventListener('click', async (event) => {
+                    event.stopPropagation(); // Prevent other elements within messageDiv from being clicked
                     const tempTextArea = document.createElement('textarea');
                     tempTextArea.value = originalMessageTextToCopy;
                     document.body.appendChild(tempTextArea);
@@ -502,13 +571,6 @@
                     }
                 });
                 messageDiv.appendChild(messageCopyButton);
-            }
-
-            if (imageUrl) {
-                const imgElement = document.createElement('img');
-                imgElement.src = imageUrl;
-                imgElement.classList.add('mt-2', 'rounded-md', 'max-w-full', 'h-auto', 'max-h-48', 'object-contain');
-                messageDiv.appendChild(imgElement);
             }
 
             chatHistoryDiv.appendChild(messageDiv);
@@ -580,12 +642,14 @@
                         data: attachedFile.data
                     }
                 });
+                // Pass the image data for immediate display in the user's message
                 appendMessage('', 'user', `data:${attachedFile.mimeType};base64,${attachedFile.data}`);
             }
 
             chatHistory.push({ role: 'user', parts: parts });
 
             userInput.value = '';
+            userInput.style.height = 'auto'; // Reset height of textarea after sending
             clearAttachedFile();
 
             loadingIndicator.classList.remove('hidden');
@@ -641,6 +705,7 @@
             chatHistoryDiv.classList.remove('hidden');
             codeEditorContainer.classList.add('hidden');
             chatHistoryDiv.scrollTop = chatHistoryDiv.scrollHeight;
+            userInput.focus(); // Ensure focus returns to the chat input
         }
 
         function showCodeView() {
@@ -648,8 +713,49 @@
             chatHistoryDiv.classList.add('hidden');
             if (codeMirrorEditor) {
                 codeMirrorEditor.refresh();
+                codeMirrorEditor.focus(); // Focus the CodeMirror editor
             }
         }
+
+        // --- Theme Management ---
+        function setTheme(theme) {
+            if (theme === 'dark') {
+                document.body.classList.add('dark');
+                moonIcon.classList.remove('hidden');
+                sunIcon.classList.add('hidden');
+                localStorage.setItem('theme', 'dark');
+            } else {
+                document.body.classList.remove('dark');
+                sunIcon.classList.remove('hidden');
+                moonIcon.classList.add('hidden');
+                localStorage.setItem('theme', 'light');
+            }
+        }
+
+        function toggleTheme() {
+            if (document.body.classList.contains('dark')) {
+                setTheme('light');
+            } else {
+                setTheme('dark');
+            }
+        }
+
+        // --- Dynamic Textarea Height ---
+        function adjustTextareaHeight(textarea) {
+            textarea.style.height = 'auto'; // Reset height to recalculate
+            textarea.style.height = Math.min(textarea.scrollHeight, textarea.clientHeight + (textarea.scrollHeight - textarea.clientHeight) / 1.5) + 'px';
+            // Limit to 5 rows (approximate based on line-height)
+            const maxRows = 5;
+            const lineHeight = parseFloat(getComputedStyle(textarea).lineHeight);
+            const maxHeight = lineHeight * maxRows;
+            if (textarea.scrollHeight > maxHeight) {
+                textarea.style.height = maxHeight + 'px';
+                textarea.style.overflowY = 'auto'; // Enable scrollbar when max height is reached
+            } else {
+                textarea.style.overflowY = 'hidden';
+            }
+        }
+
 
         // --- Event Listeners ---
         sendButton.addEventListener('click', sendMessage);
@@ -659,6 +765,8 @@
                 sendMessage();
             }
         });
+        userInput.addEventListener('input', () => adjustTextareaHeight(userInput));
+
 
         // Copy Code Button for Canvas
         copyCodeButton.addEventListener('click', () => {
@@ -712,6 +820,8 @@
 
         clearFileButton.addEventListener('click', clearAttachedFile);
 
+        themeToggleButton.addEventListener('click', toggleTheme);
+
         // Inicjalizacja po załadowaniu strony
         window.onload = () => {
             codeMirrorEditor = CodeMirror.fromTextArea(codeCanvas, {
@@ -737,7 +847,18 @@
 
             loadChat(); // Load the single chat session
 
+            // Set initial theme based on localStorage or system preference
+            const savedTheme = localStorage.getItem('theme');
+            if (savedTheme) {
+                setTheme(savedTheme);
+            } else if (window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches) {
+                setTheme('dark'); // Default to dark if system prefers dark
+            } else {
+                setTheme('light'); // Default to light
+            }
+
             userInput.focus();
+            adjustTextareaHeight(userInput); // Adjust initial height
         };
 
         // Zapisz bieżący czat przed opuszczeniem/przeładowaniem strony
