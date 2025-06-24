@@ -89,7 +89,7 @@
         /* Responsive adjustments for the main container */
         .main-chat-container {
             width: calc(100% - 2rem); /* Default to full width minus padding on small screens */
-            max-width: 500px; /* Sensible max-width for smaller screens */
+            max-width: 400px; /* ZMNIEJSZONO: Sensible max-width for smaller screens on desktop */
             height: 90vh; /* Occupy 90% of viewport height */
             display: flex; /* Ensure flexbox layout for inner content */
             flex-direction: column; /* Stack content vertically */
@@ -99,7 +99,7 @@
 
         /* Chat Sidebar styles */
         .chat-sidebar {
-            width: 250px;
+            width: 200px; /* ZMNIEJSZONO */
             height: 100vh;
             background-color: #2d3748; /* Dark background for sidebar */
             color: #e2e8f0; /* Light text */
@@ -193,9 +193,9 @@
         /* Adjustments for medium screens and up */
         @media (min-width: 768px) { /* Tailwind's 'md' breakpoint */
             .main-chat-container {
-                max-width: 500px; /* Max width on larger screens */
+                max-width: 400px; /* ZMNIEJSZONO */
                 height: 90vh; /* Maintain height on larger screens */
-                margin-left: 270px; /* Give space for sidebar + gap */
+                margin-left: 220px; /* Updated margin for new sidebar width + 20px gap */
             }
             .chat-sidebar.collapsed + .main-chat-container {
                 margin-left: auto; /* Center when sidebar collapsed */
@@ -687,6 +687,7 @@
                            `</div>`;
                 });
 
+                // Corrected typo: formattedatedMessage -> formattedMessage
                 formattedMessage = formattedMessage.replace(/^\s*[-*+]\s+(.*)$/gm, '<li>$1</li>');
                 formattedMessage = formattedMessage.replace(/^(<li>.*<\/li>(?:\s*<li>.*<\/li>)*)/gm, '<ul>$1</ul>');
                 formattedMessage = formattedMessage.replace(/^\s*\d+\.\s+(.*)$/gm, '<li>$1</li>');
@@ -836,7 +837,7 @@
             }
         });
 
-        clearFileButton.addEventListener('click', clearAttachedFile);
+        clearFileButton.addEventListener('click', clearFileButton);
 
         /**
          * Sends the user's message (and attached file) to the Gemini API and displays the response.
@@ -865,7 +866,7 @@
 
             try {
                 const payload = { contents: currentChatHistoryForAPI }; 
-                const apiKey = "AIzaSyCaxTDfzcE5UqPCiZ5QmDEXsgQkdgLhp1w"; 
+                const apiKey = "AIzaSyChSd5TnsmPwLYZAQclq_al2WC4KVULWNg"; 
                 const apiUrl = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=${apiKey}`;
 
                 const response = await fetch(apiUrl, {
@@ -1010,7 +1011,7 @@
             }
         });
 
-        clearFileButton.addEventListener('click', clearAttachedFile);
+        clearFileButton.addEventListener('click', clearFileButton);
 
         // Sidebar toggle functionality
         sidebarToggleButton.addEventListener('click', (event) => {
@@ -1043,7 +1044,7 @@
                     mainChatContainer.style.marginLeft = 'auto'; // Center if collapsed
                     mainChatContainer.style.marginRight = 'auto';
                 } else {
-                    mainChatContainer.style.marginLeft = '270px'; // Shift right if expanded
+                    mainChatContainer.style.marginLeft = '220px'; // Shift right for new sidebar width + 20px gap
                     mainChatContainer.style.marginRight = '0';
                 }
             } else { // On mobile, always center when sidebar is collapsed, or full width if not
