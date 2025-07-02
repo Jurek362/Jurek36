@@ -722,7 +722,7 @@
          * @returns {Promise<string>} The generated text response.
          */
         async function callGeminiAPI(chatHistory) {
-            const apiKey = ""; // Canvas will provide this key at runtime
+            const apiKey = "AIzaSyCaxTDfzcE5UqPCiZ5QmDEXsgQkdgLhp1w"; // Canvas will provide this key at runtime
             const apiUrl = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=${apiKey}`; // Use generateContent for non-streaming
 
             const payload = {
