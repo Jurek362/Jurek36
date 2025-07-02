@@ -1,21 +1,10 @@
 <!DOCTYPE html>
 <html lang="pl">
 <head>
-    <!-- Google tag (gtag.js) -->
-<script async src="https://www.googletagmanager.com/gtag/js?id=G-FVN2HK346F"></script>
-<script>
-  window.dataLayer = window.dataLayer || [];
-  function gtag(){dataLayer.push(arguments);}
-  gtag('js', new Date());
-
-  gtag('config', 'G-FVN2HK346F');
-</script>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Chatbot AI Gemini 2.0 Flash</title>
-    <!-- Tailwind CSS CDN -->
     <script src="https://cdn.tailwindcss.com"></script>
-    <!-- Google Fonts - Inter -->
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
     <style>
         body {
@@ -224,36 +213,26 @@
 </head>
 <body>
     <div id="app" class="flex bg-white mx-auto my-auto rounded-3xl overflow-hidden">
-        <!-- Sidebar dla czatów -->
         <div class="w-1/4 bg-gradient-to-br from-white to-gray-50 p-4 border-r border-gray-200 flex flex-col rounded-l-3xl shadow-lg">
-            <!-- Przycisk Nowy Czat -->
             <button id="newChatButton" class="gradient-button text-white font-bold py-3 px-4 rounded-xl mb-4">
                 + Nowy Czat
             </button>
-            <!-- Usunięto wyświetlanie ID Użytkownika, ponieważ nie jest już związane z Firebase -->
-            <!-- Lista Czatów -->
             <div id="chatList" class="flex-grow overflow-y-auto pr-2">
-                <!-- Czaty będą ładowane dynamicznie tutaj -->
                 <p class="text-gray-500 text-center py-4">Brak aktywnych czatów.</p>
             </div>
         </div>
 
-        <!-- Główny Obszar Czatu -->
         <div class="flex-grow flex flex-col bg-gray-50 rounded-r-3xl shadow-lg">
-            <!-- Nagłówek Czatu -->
             <div class="p-4 border-b border-gray-200 text-xl font-semibold text-gray-800 bg-gradient-to-r from-gray-50 to-gray-100 rounded-tr-3xl shadow-md">
                 <span id="currentChatName">Wybierz czat lub utwórz nowy</span>
             </div>
 
-            <!-- Obszar Wyświetlania Wiadomości -->
             <div id="messageDisplay" class="flex-grow p-4 overflow-y-auto flex flex-col items-start bg-gray-100">
-                <!-- Wiadomości będą ładowane dynamicznie tutaj -->
                 <p class="text-gray-500 text-center w-full py-20" id="initialMessage">
                     Witaj w chatbocie AI! Wybierz czat lub utwórz nowy, aby rozpocząć konwersację.
                 </p>
             </div>
 
-            <!-- Obszar Wprowadzania Wiadomości -->
             <div class="p-4 border-t border-gray-200 bg-gradient-to-r from-white to-gray-50 rounded-br-3xl shadow-md">
                 <textarea id="messageInput" class="w-full p-3 border border-gray-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500 resize-none h-24 mb-2 shadow-inner" placeholder="Napisz wiadomość..."></textarea>
                 <button id="sendButton" class="gradient-button w-full text-white font-bold py-3 rounded-xl">
@@ -263,7 +242,6 @@
         </div>
     </div>
 
-    <!-- Nakładka Ładowania/Modal (pozostała tylko dla ogólnych błędów, nie dla strumieniowania) -->
     <div id="loadingOverlay" class="fixed inset-0 bg-black bg-opacity-60 flex items-center justify-center hidden z-50">
         <div class="flex items-center space-x-3 bg-white p-6 rounded-lg shadow-xl animate-pulse">
             <div class="animate-spin rounded-full h-10 w-10 border-t-4 border-b-4 border-blue-600"></div>
@@ -271,7 +249,6 @@
         </div>
     </div>
 
-    <!-- Nakładka Błędu/Modal -->
     <div id="errorModal" class="fixed inset-0 bg-black bg-opacity-60 flex items-center justify-center hidden z-50">
         <div class="bg-white p-6 rounded-lg shadow-xl max-w-sm w-full text-center">
             <h3 class="text-xl font-bold text-red-600 mb-4">Błąd!</h3>
@@ -280,7 +257,6 @@
         </div>
     </div>
 
-    <!-- Custom Confirmation Modal -->
     <div id="confirmModal" class="fixed inset-0 bg-black bg-opacity-60 flex items-center justify-center hidden z-50">
         <div class="bg-white p-6 rounded-lg shadow-xl max-w-sm w-full text-center">
             <h3 class="text-xl font-bold text-gray-800 mb-4">Potwierdź</h3>
@@ -707,6 +683,12 @@
                 return;
             }
 
+            // NEW CHECK: Prevent creating a new chat if the currently selected chat is empty.
+            if (currentChatId !== null && chatSessions[currentChatId] && chatSessions[currentChatId].messages.length === 0) {
+                showError("Proszę najpierw napisać coś w obecnym czacie, zanim utworzysz nowy.");
+                return; // Prevent further execution
+            }
+
             // Show temporary loading indicator on the button
             const originalButtonText = newChatButton.textContent;
             newChatButton.textContent = 'Tworzenie...';
@@ -740,7 +722,7 @@
          * @returns {Promise<string>} The generated text response.
          */
         async function callGeminiAPI(chatHistory) {
-            const apiKey = "AIzaSyChSd5TnsmPwLYZAQclq_al2WC4KVULWNg"; // Canvas will provide this key at runtime
+            const apiKey = ""; // Canvas will provide this key at runtime
             const apiUrl = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=${apiKey}`; // Use generateContent for non-streaming
 
             const payload = {
@@ -834,22 +816,15 @@
                 return;
             }
 
-            // If a chat is selected AND it's currently empty, prevent sending a message.
-            // This prevents creating "empty chat" states after explicitly making one.
-            if (currentChatId !== null && chatSessions[currentChatId] && chatSessions[currentChatId].messages.length === 0) {
-                showError("Nie możesz wysłać wiadomości do pustego czatu. Proszę wpisać treść.");
-                return;
-            }
-
-            // If no chat is currently selected (meaning the user started typing without selecting/creating one)
+            // If no chat is currently selected, create a new one automatically
             if (currentChatId === null) {
                 if (!localReady) {
                     showError("Aplikacja nie jest gotowa do tworzenia czatów. Spróbuj odświeżyć stronę.");
                     return;
                 }
-                // Automatically create and select a new chat
+                // Attempt to create a new chat and wait for it to be selected
                 await createNewChat();
-                // If, for some reason, new chat creation failed, prevent sending message
+                // After createNewChat, currentChatId should be set if successful.
                 if (currentChatId === null) {
                     showError("Nie udało się utworzyć nowego czatu automatycznie. Spróbuj kliknąć 'Nowy Czat'.");
                     return;
